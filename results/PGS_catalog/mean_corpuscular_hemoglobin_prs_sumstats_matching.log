@@ -1,0 +1,458 @@
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Mon Jun 12 00:12:24 2023: 15 PRSes detected.
+Mon Jun 12 00:12:24 2023: WORKING ON PGS000099 -----------------------------
+No. rows of GWAS file = 23061
+No. rows of PRS file = 27081
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_e_o = 23061
+Appending p-values for agreeing varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS000099 = 4020
+Matching rate for PGS000099 = 0.851556441785754
+Mon Jun 12 00:12:25 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1    205226288             T            C  -0.011567177    01
+2:        1    205140436             G            A  -0.001069233    01
+3:        1    199010721             C            T  -0.043817737    01
+4:        1    248039451             C            T   0.027575649  <NA>
+5:        1     47679258             C            T  -0.021683909    01
+6:        1    118153977             T            G  -0.019137819    01
+         pos major minor         beta gwas_p_value
+1: 205226288     T     C -0.011567177 1.271958e-59
+2: 205140436     G     A -0.001069233 8.508061e-50
+3: 199010721     T     C  0.043817737 4.239253e-35
+4:        NA  <NA>  <NA>           NA           NA
+5:  47679258     T     C  0.021683909 1.199862e-34
+6: 118153977     T     G -0.019137819 8.327704e-27
+No. rows in out.file = 27081
+No. rows in prs.file = 27081
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS000099 = 27081
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.851556441785754
+Mon Jun 12 00:12:26 2023: WORKING ON PGS000174 -----------------------------
+No. rows of GWAS file = 614
+No. rows of PRS file = 628
+Matching on rsID column, pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 287
+No. varid in agreement with varid_e_o = 249
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS000174 = 16
+Matching rate for PGS000174 = 0.974522292993631
+Mon Jun 12 00:12:26 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1    114989211             G            T     0.0251091    01
+2:        1    118168234             T            C     0.0302349    01
+3:        1    118251143             T            C     0.0481297    01
+4:        1    154259650             A            G     0.0183359    01
+5:        1    154291255             C            G     0.0235211    01
+6:        1    154418415             C            T     0.0214718    01
+         pos major minor       beta gwas_p_value
+1: 114989211     T     G -0.0251091 2.604518e-16
+2: 118168234     C     T -0.0302349 1.609343e-21
+3: 118251143     C     T -0.0481297 1.100717e-33
+4: 154259650     G     A -0.0183359 2.405563e-08
+5: 154291255     G     C -0.0235211 9.115107e-13
+6: 154418415     T     C -0.0214718 1.184398e-16
+No. rows in out.file = 628
+No. rows in prs.file = 628
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS000174 = 628
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.974522292993631
+Mon Jun 12 00:12:26 2023: WORKING ON PGS001219 -----------------------------
+No. rows of GWAS file = 12581
+No. rows of PRS file = 13003
+Matching on rsID column, pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 256
+Appending p-values for agreeing varid_o_e variants
+Duplicate variants found for PGS001219
+No. rows filled in PRS file by GWAS result for PGS001219 = 469
+Matching rate for PGS001219 = 0.967315234945782
+Mon Jun 12 00:12:26 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1      1354515             G            C  1.413230e-03    01
+2:        1      2886466             T            C  8.160144e-05    01
+3:        1     15710411             C            G  7.331680e-03    01
+4:        1     15914648             A            G -2.319703e-03    01
+5:        1     17548193             G            C -1.216224e-04    01
+6:        1     22882587             G            A -5.052687e-04    01
+        pos major minor          beta gwas_p_value
+1:  1354515     C     G -1.413230e-03 0.0551653893
+2:  2886466     C     T -8.160144e-05 0.0795077241
+3: 15710411     G     C -7.331680e-03 0.0003553518
+4: 15914648     G     A  2.319703e-03 0.2486986498
+5: 17548193     C     G  1.216224e-04 0.0375649623
+6: 22882587     A     G  5.052687e-04 0.5609095699
+No. rows in out.file = 13003
+No. rows in prs.file = 13003
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS001219 = 13003
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.963931400446051
+Mon Jun 12 00:12:26 2023: WORKING ON PGS001989 -----------------------------
+No. rows of GWAS file = 43991
+No. rows of PRS file = 44174
+Matching on rsID column, pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 36396
+Appending p-values for agreeing varid_o_e variants
+No. rows filled in PRS file by GWAS result for PGS001989 = 183
+Matching rate for PGS001989 = 0.995857291619505
+Mon Jun 12 00:12:27 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom     pos
+1:        1      1489670             T            C -0.0072273868    01 1489670
+2:        1      1490559             G            A -0.0002753860    01 1490559
+3:        1      1689762             C            T -0.0008485606    01 1689762
+4:        1      1692321             C            T -0.0004753532    01 1692321
+5:        1      1721479             T            C  0.0006382136    01 1721479
+6:        1      1722932             T            C  0.0002898014    01 1722932
+   major minor          beta gwas_p_value
+1:     C     T  0.0072273868  0.001241482
+2:     A     G  0.0002753860  0.001260798
+3:     T     C  0.0008485606  0.005773324
+4:     T     C  0.0004753532  0.003070450
+5:     C     T -0.0006382136  0.008197276
+6:     C     T -0.0002898014  0.008526562
+No. rows in out.file = 44174
+No. rows in prs.file = 44174
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS001989 = 44174
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.995857291619505
+Mon Jun 12 00:12:27 2023: WORKING ON PGS002206 -----------------------------
+No. rows of GWAS file = 503696
+No. rows of PRS file = 504929
+Matching on rsID column, pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 440161
+Appending p-values for agreeing varid_o_e variants
+No. rows filled in PRS file by GWAS result for PGS002206 = 1233
+Matching rate for PGS002206 = 0.997558072521087
+Mon Jun 12 00:12:35 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom     pos
+1:        1      1130727             C            A  1.144196e-04    01 1130727
+2:        1      1474304             A            C -1.366688e-04    01 1474304
+3:        1      1478153             C            T -8.451092e-05    01 1478153
+4:        1      1478180             C            T -8.252834e-05    01 1478180
+5:        1      1483010             A            G -1.892304e-04    01 1483010
+6:        1      1489670             T            C -1.783101e-03    01 1489670
+   major minor          beta gwas_p_value
+1:     A     C -1.144196e-04  0.019497734
+2:     C     A  1.366688e-04  0.011803676
+3:     T     C  8.451092e-05  0.051876232
+4:     T     C  8.252834e-05  0.052720565
+5:     G     A  1.892304e-04  0.008023543
+6:     C     T  1.783101e-03  0.001241482
+No. rows in out.file = 504929
+No. rows in prs.file = 504929
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002206 = 504929
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.997558072521087
+Mon Jun 12 00:12:36 2023: WORKING ON PGS002339 -----------------------------
+No. rows of GWAS file = 961367
+No. rows of PRS file = 1109311
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_e_o = 961367
+Appending p-values for agreeing varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002339 = 147944
+Matching rate for PGS002339 = 0.866634334284975
+Mon Jun 12 00:12:50 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom    pos
+1:        1       752721             A            G -0.0000075744  <NA>     NA
+2:        1       754182             A            G -0.0000345865    01 754182
+3:        1       760912             C            T -0.0000149391  <NA>     NA
+4:        1       768448             G            A -0.0000309909  <NA>     NA
+5:        1       779322             A            G  0.0000026028  <NA>     NA
+6:        1       838555             C            A -0.0001493916  <NA>     NA
+   major minor        beta gwas_p_value
+1:  <NA>  <NA>          NA           NA
+2:     G     A 3.45865e-05   0.06268695
+3:  <NA>  <NA>          NA           NA
+4:  <NA>  <NA>          NA           NA
+5:  <NA>  <NA>          NA           NA
+6:  <NA>  <NA>          NA           NA
+No. rows in out.file = 1109311
+No. rows in prs.file = 1109311
+Removing 1 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002339 = 1109310
+Fraction removed from original file (due to effect_weight = 0) = 9.01460456059766e-07
+Percent final betas available (i.e., matched) = 0.866634334284975
+Mon Jun 12 00:12:53 2023: WORKING ON PGS002371 -----------------------------
+No. rows of GWAS file = 808872
+No. rows of PRS file = 920923
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 532738
+No. varid in agreement with varid_e_o = 276134
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002371 = 112051
+Matching rate for PGS002371 = 0.878327504036711
+Mon Jun 12 00:13:04 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom    pos
+1:        1       846808             T            C   7.93950e-05    01 846808
+2:        1       870645             C            T   4.00971e-05    01 870645
+3:        1       879317             T            C  -1.40945e-05    01 879317
+4:        1       882033             A            G   1.63500e-06    01 882033
+5:        1       886384             A            G  -7.76640e-06    01 886384
+6:        1       944564             C            T   5.57302e-05    01 944564
+   major minor         beta gwas_p_value
+1:     C     T -7.93950e-05   0.91664029
+2:     T     C -4.00971e-05   0.09622475
+3:     C     T  1.40945e-05   0.64300251
+4:     G     A -1.63500e-06   0.56699447
+5:     G     A  7.76640e-06   0.61033272
+6:     T     C -5.57302e-05   0.74603768
+No. rows in out.file = 920923
+No. rows in prs.file = 920923
+Removing 343 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002371 = 920580
+Fraction removed from original file (due to effect_weight = 0) = 0.00037245242001771
+Percent final betas available (i.e., matched) = 0.878327504036711
+Mon Jun 12 00:13:05 2023: WORKING ON PGS002411 -----------------------------
+No. rows of GWAS file = 16675
+No. rows of PRS file = 22349
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 3
+No. varid in agreement with varid_e_o = 16672
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002411 = 5677
+Matching rate for PGS002411 = 0.745984160365117
+Mon Jun 12 00:13:06 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1     51746188         TTTTC            T   -0.01837875    01
+2:        6     27493970             T      TTTCTTA    0.02125243    06
+3:        6    109406718             T        TCACA    0.04745500    06
+4:        1    205226288             T            C   -0.04324008    01
+5:        1    198543027             C            T   -0.11679718    01
+6:        1    205102913            AT            A   -0.03525842    01
+         pos   major minor        beta gwas_p_value
+1:  51746188       T TTTTC  0.01837875 7.714667e-01
+2:  27493970 TTTCTTA     T -0.02125243           NA
+3: 109406718   TCACA     T -0.04745500 9.528682e-28
+4: 205226288       T     C -0.04324008 1.271958e-59
+5: 198543027       C     T -0.11679718 7.360059e-62
+6: 205102913       A    AT  0.03525842 2.376457e-39
+No. rows in out.file = 22349
+No. rows in prs.file = 22349
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002411 = 22349
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.745984160365117
+Mon Jun 12 00:13:06 2023: WORKING ON PGS002460 -----------------------------
+No. rows of GWAS file = 31508
+No. rows of PRS file = 44827
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 3
+No. varid in agreement with varid_e_o = 31505
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002460 = 13322
+Matching rate for PGS002460 = 0.702813036785866
+Mon Jun 12 00:13:07 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1     51746188         TTTTC            T   -0.01837875    01
+2:        6     27493970             T      TTTCTTA    0.02125243    06
+3:        6    109406718             T        TCACA    0.04745500    06
+4:        1    205226288             T            C   -0.04324008    01
+5:        1    198543027             C            T   -0.11679718    01
+6:        1    205102913            AT            A   -0.03525842    01
+         pos   major minor        beta gwas_p_value
+1:  51746188       T TTTTC  0.01837875 7.714667e-01
+2:  27493970 TTTCTTA     T -0.02125243           NA
+3: 109406718   TCACA     T -0.04745500 9.528682e-28
+4: 205226288       T     C -0.04324008 1.271958e-59
+5: 198543027       C     T -0.11679718 7.360059e-62
+6: 205102913       A    AT  0.03525842 2.376457e-39
+No. rows in out.file = 44827
+No. rows in prs.file = 44827
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002460 = 44827
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.702813036785866
+Mon Jun 12 00:13:07 2023: WORKING ON PGS002509 -----------------------------
+No. rows of GWAS file = 93293
+No. rows of PRS file = 151362
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 19
+No. varid in agreement with varid_e_o = 93274
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002509 = 58088
+Matching rate for PGS002509 = 0.61623128658448
+Mon Jun 12 00:13:08 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1     51746188         TTTTC            T   -0.01837875    01
+2:        1      9677519             C        CTAAA    0.01010382    01
+3:        4     79748914             A       AAAAAC    0.09119575    04
+4:        4    149450947             T         TTTG    0.04558023    04
+5:        4     15357686         TTTTG            T    0.01235265    04
+6:        6     27493970             T      TTTCTTA    0.02125243    06
+         pos   major minor        beta gwas_p_value
+1:  51746188       T TTTTC  0.01837875    0.7714667
+2:   9677519   CTAAA     C -0.01010382           NA
+3:  79748914  AAAAAC     A -0.09119575           NA
+4: 149450947    TTTG     T -0.04558023    0.1108622
+5:  15357686       T TTTTG -0.01235265           NA
+6:  27493970 TTTCTTA     T -0.02125243           NA
+No. rows in out.file = 151362
+No. rows in prs.file = 151362
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002509 = 151362
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.61623128658448
+Mon Jun 12 00:13:08 2023: WORKING ON PGS002558 -----------------------------
+No. rows of GWAS file = 8300
+No. rows of PRS file = 10888
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 2
+No. varid in agreement with varid_e_o = 8298
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002558 = 2590
+Matching rate for PGS002558 = 0.762123438648053
+Mon Jun 12 00:13:08 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1     51746188         TTTTC            T   -0.01837875    01
+2:        6     27493970             T      TTTCTTA    0.02125243    06
+3:        1    205226288             T            C   -0.04324008    01
+4:        1    198543027             C            T   -0.11679718    01
+5:        1    205102913            AT            A   -0.03525842    01
+6:        1    118251143             C            T   -0.04477963    01
+         pos   major minor        beta gwas_p_value
+1:  51746188       T TTTTC  0.01837875 7.714667e-01
+2:  27493970 TTTCTTA     T -0.02125243           NA
+3: 205226288       T     C -0.04324008 1.271958e-59
+4: 198543027       C     T -0.11679718 7.360059e-62
+5: 205102913       A    AT  0.03525842 2.376457e-39
+6: 118251143       C     T -0.04477963 1.100717e-33
+No. rows in out.file = 10888
+No. rows in prs.file = 10888
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002558 = 10888
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.762123438648053
+Mon Jun 12 00:13:08 2023: WORKING ON PGS002607 -----------------------------
+No. rows of GWAS file = 6162
+No. rows of PRS file = 8017
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 1
+No. varid in agreement with varid_e_o = 6161
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002607 = 1856
+Matching rate for PGS002607 = 0.768491954596482
+Mon Jun 12 00:13:09 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        6     27493970             T      TTTCTTA    0.02125243    06
+2:        1    205226288             T            C   -0.04324008    01
+3:        1    198543027             C            T   -0.11679718    01
+4:        1    205102913            AT            A   -0.03525842    01
+5:        1    118251143             C            T   -0.04477963    01
+6:        1     47670911             T            C   -0.03239974    01
+         pos   major minor        beta gwas_p_value
+1:  27493970 TTTCTTA     T -0.02125243           NA
+2: 205226288       T     C -0.04324008 1.271958e-59
+3: 198543027       C     T -0.11679718 7.360059e-62
+4: 205102913       A    AT  0.03525842 2.376457e-39
+5: 118251143       C     T -0.04477963 1.100717e-33
+6:  47670911       C     T  0.03239974 7.948516e-35
+No. rows in out.file = 8017
+No. rows in prs.file = 8017
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002607 = 8017
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.768491954596482
+Mon Jun 12 00:13:09 2023: WORKING ON PGS002656 -----------------------------
+No. rows of GWAS file = 292508
+No. rows of PRS file = 351633
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 15
+No. varid in agreement with varid_e_o = 292493
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002656 = 59140
+Matching rate for PGS002656 = 0.831813282598618
+Mon Jun 12 00:13:13 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom
+1:        1     51746188         TTTTC            T -1.149540e-04    01
+2:        3     38693444        TTTTTG            T -1.815167e-05    03
+3:        3    176964107         CAGAA            C  4.472560e-06    03
+4:        4     79748914             A       AAAAAC  3.015730e-04    04
+5:        7    100548634       TTTTTTG            T  8.777829e-06    07
+6:       10      8339143         TTTCC            T -2.649826e-05    10
+         pos  major   minor          beta gwas_p_value
+1:  51746188      T   TTTTC  1.149540e-04    0.7714667
+2:  38693444      T  TTTTTG  1.815167e-05           NA
+3: 176964107      C   CAGAA -4.472560e-06           NA
+4:  79748914 AAAAAC       A -3.015730e-04           NA
+5: 100548634      T TTTTTTG -8.777829e-06           NA
+6:   8339143      T   TTTCC  2.649826e-05           NA
+No. rows in out.file = 351633
+No. rows in prs.file = 351633
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002656 = 351633
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.831813282598618
+Mon Jun 12 00:13:13 2023: WORKING ON PGS002705 -----------------------------
+No. rows of GWAS file = 851626
+No. rows of PRS file = 979778
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_e_o = 851626
+Appending p-values for agreeing varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS002705 = 128152
+Matching rate for PGS002705 = 0.869203023542068
+Mon Jun 12 00:13:24 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom    pos
+1:        1       754182             A            G     -0.000028    01 754182
+2:        1       768448             G            A     -0.000042  <NA>     NA
+3:        1       779322             A            G      0.000018  <NA>     NA
+4:        1       838555             C            A     -0.000118  <NA>     NA
+5:        1       846808             C            T      0.000047    01 846808
+6:        1       853954             C            A      0.000031    01 853954
+   major minor     beta gwas_p_value
+1:     G     A  2.8e-05   0.06268695
+2:  <NA>  <NA>       NA           NA
+3:  <NA>  <NA>       NA           NA
+4:  <NA>  <NA>       NA           NA
+5:     C     T  4.7e-05   0.91664029
+6:     A     C -3.1e-05   0.63796091
+No. rows in out.file = 979778
+No. rows in prs.file = 979778
+Removing 0 variants with effect_weight = 0 to save memory
+Final no. variants for PGS002705 = 979778
+Fraction removed from original file (due to effect_weight = 0) = 0
+Percent final betas available (i.e., matched) = 0.869203023542068
+Mon Jun 12 00:13:25 2023: WORKING ON PGS003560 -----------------------------
+No. rows of GWAS file = 855188
+No. rows of PRS file = 979739
+No rsID. Matching on pos-other-effect and pos-effect-other
+No. varid in agreement with varid_o_e = 616691
+No. varid in agreement with varid_e_o = 238497
+Appending p-values for agreeing varid_o_e and varid_e_o variants
+No. rows filled in PRS file by GWAS result for PGS003560 = 124551
+Matching rate for PGS003560 = 0.872873285640359
+Mon Jun 12 00:13:39 2023: Saving PRS file in perturbation-friendly format
+   chr_name chr_position effect_allele other_allele effect_weight chrom    pos
+1:        1       846808             T            C -1.616488e-05    01 846808
+2:        1       854250             G            A -4.112055e-06    01 854250
+3:        1       870645             C            T -3.149178e-06    01 870645
+4:        1       879317             T            C  3.721192e-05    01 879317
+5:        1       882033             A            G  0.000000e+00    01 882033
+6:        1       886384             A            G  9.875926e-06    01 886384
+   major minor          beta gwas_p_value
+1:     C     T  1.616488e-05   0.91664029
+2:     A     G  4.112055e-06   0.86567952
+3:     T     C  3.149178e-06   0.09622475
+4:     C     T -3.721192e-05   0.64300251
+5:     G     A  0.000000e+00   0.56699447
+6:     G     A -9.875926e-06   0.61033272
+No. rows in out.file = 979739
+No. rows in prs.file = 979739
+Removing 341730 variants with effect_weight = 0 to save memory
+Final no. variants for PGS003560 = 638009
+Fraction removed from original file (due to effect_weight = 0) = 0.348796975521032
+Percent final betas available (i.e., matched) = 0.872873285640359
+There were 17 warnings (use warnings() to see them)
