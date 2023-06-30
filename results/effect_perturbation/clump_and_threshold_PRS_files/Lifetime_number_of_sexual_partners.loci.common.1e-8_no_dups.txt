@@ -1,0 +1,1 @@
+chrom,pos,major,minor,beta,p_value,gwas_p_value
