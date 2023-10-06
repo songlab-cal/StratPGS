@@ -42,28 +42,29 @@ message('sig.cutoff = ', sig.cutoff)
 #   perturb.dir <- '/illumina/scratch/deep_learning/aaw/051723/results/prs_perturbation_sensitivity/'
 # }
 # 
-# ## Helper function for computing Spearman correlation --------------------------
-# # The function below is based on cor.test, and does the following.
-# # It performs a Spearman correlation test without the t-distribution approximation 
-# # (i.e., the parameter exact=TRUE) in case there are no ties in ranks, 
-# # but switches to the t-distribution approximation (i.e., the parameter exact=FALSE) 
-# # when ties in ranks are detected.
-# spearman_cor_test <- function(x, y, ...) {
-#   # Check for ties in ranks
-#   ties_check <- length(unique(rank(x))) < length(x) || length(unique(rank(y))) < length(y)
-#   
-#   if (ties_check) {
-#     message("Ties detected, using exact = FALSE...")
-#     # Ties detected, use t-distribution approximation
-#     result <- cor.test(x, y, method = "spearman", exact = FALSE, ...)
-#   } else {
-#     # No ties, use exact calculation
-#     result <- cor.test(x, y, method = "spearman", exact = TRUE, ...)
-#   }
-#   
-#   return(result)
-# }
-# 
+
+## Helper function for computing Spearman correlation --------------------------
+# The function below is based on cor.test, and does the following.
+# It performs a Spearman correlation test without the t-distribution approximation
+# (i.e., the parameter exact=TRUE) in case there are no ties in ranks,
+# but switches to the t-distribution approximation (i.e., the parameter exact=FALSE)
+# when ties in ranks are detected.
+spearman_cor_test <- function(x, y, ...) {
+  # Check for ties in ranks
+  ties_check <- length(unique(rank(x))) < length(x) || length(unique(rank(y))) < length(y)
+
+  if (ties_check) {
+    message("Ties detected, using exact = FALSE...")
+    # Ties detected, use t-distribution approximation
+    result <- cor.test(x, y, method = "spearman", exact = FALSE, ...)
+  } else {
+    # No ties, use exact calculation
+    result <- cor.test(x, y, method = "spearman", exact = TRUE, ...)
+  }
+
+  return(result)
+}
+
 # ## Main Body -------------------------------------------------------------------
 # # Read perturbation sensitivity metrics
 # prs_shuffle_max <- readr::read_csv(paste0(perturb.dir,'gwas',
