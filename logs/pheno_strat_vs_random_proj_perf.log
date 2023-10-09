@@ -1,0 +1,168 @@
+
+> sink(stdout(), type = "message")
+
+> library(data.table)
+
+> library(dplyr)
+
+> user_defined_results_dir <- "/Users/alanaw/Documents/GitProjects/StratPRS/results/random_projections/"
+
+> raw_orig_1stvisit <- readr::read_csv(paste0(user_defined_results_dir,
++                                             "stratification_vs_predictabilit ..." ... [TRUNCATED] 
+[1mindexing[0m [34mORIG_1stVisit_phenos_metrics.csv[0m [====================] [32m2.84GB/s[0m, eta: [36m 0s[0m                                                                                                                      Rows: 141 Columns: 11
+── Column specification ───────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (1): PHENOTYPE
+dbl (10): PC1_ABS_COS_SIM, PC1_ABS_PEARSON, RANK_PC1_COS_SIM, RANK_PC1_PEARSON,...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+> IRNT_orig <- readr::read_csv(paste0(user_defined_results_dir,
++                                     "stratification_vs_predictability/IRNT_phenos_me ..." ... [TRUNCATED] 
+[1mindexing[0m [34mIRNT_phenos_metrics.csv[0m [=============================] [32m3.54GB/s[0m, eta: [36m 0s[0m                                                                                                                      Rows: 141 Columns: 11
+── Column specification ───────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (1): PHENOTYPE
+dbl (10): PC1_ABS_COS_SIM, PC1_ABS_PEARSON, RANK_PC1_COS_SIM, RANK_PC1_PEARSON,...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+> ## Helper function for computing Spearman correlation --------------------------
+> # The function below is based on cor.test, and does the following .... [TRUNCATED] 
+
+> ## Main Body -------------------------------------------------------------------
+> # Get p-values and correlations
+> # I follow code in analysis_per .... [TRUNCATED] 
+
+> non_random_perf_metrics <- c('MEAN_ABS_PP_CORS','MEAN.DELTA.R2')
+
+> # Original raw, 1st visit results
+> orig_rp_perf_vs_strat_corr_array <- matrix(NA,
++                                       nrow=length(non_random_pe .... [TRUNCATED] 
+
+> orig_rp_perf_vs_strat_pvals_array <- matrix(NA,
++                                        nrow=length(non_random_perf_metrics),
++                     .... [TRUNCATED] 
+
+> colnames(orig_rp_perf_vs_strat_corr_array) <- strat_metrics
+
+> rownames(orig_rp_perf_vs_strat_corr_array) <- non_random_perf_metrics
+
+> colnames(orig_rp_perf_vs_strat_pvals_array) <- strat_metrics
+
+> rownames(orig_rp_perf_vs_strat_pvals_array) <- non_random_perf_metrics
+
+> # IRNT raw results
+> IRNT_rp_perf_vs_strat_corr_array <- matrix(NA,
++                                            nrow=length(non_random_perf_metrics .... [TRUNCATED] 
+
+> IRNT_rp_perf_vs_strat_pvals_array <- matrix(NA,
++                                             nrow=length(non_random_perf_metrics),
++                .... [TRUNCATED] 
+
+> colnames(IRNT_rp_perf_vs_strat_corr_array) <- strat_metrics
+
+> rownames(IRNT_rp_perf_vs_strat_corr_array) <- non_random_perf_metrics
+
+> colnames(IRNT_rp_perf_vs_strat_pvals_array) <- strat_metrics
+
+> rownames(IRNT_rp_perf_vs_strat_pvals_array) <- non_random_perf_metrics
+
+> n.tests <- nrow(orig_rp_perf_vs_strat_corr_array)*ncol(orig_rp_perf_vs_strat_corr_array)
+
+> message(date(), ": No. tests performed = ", n.tests)
+Sat Oct  7 23:13:52 2023: No. tests performed = 12
+
+> fwer.thres.cutoff <- 0.05/n.tests
+
+> message(date(), ": FWER corrected p-value threshold = ", fwer.thres.cutoff)
+Sat Oct  7 23:13:52 2023: FWER corrected p-value threshold = 0.00416666666666667
+
+> for (i in 1:nrow(orig_rp_perf_vs_strat_corr_array)) {
++   for (j in 1:ncol(orig_rp_perf_vs_strat_corr_array)) {
++     # Print pair 
++     message('- .... [TRUNCATED] 
+----- Working on (MEAN_ABS_PP_CORS, PC1_ABS_COS_SIM) -----
+(IRNT, original): Significant correlation, p = 0.00277658038063903
+(IRNT, original): Spearman rho = -0.250768440429813
+----- Working on (MEAN_ABS_PP_CORS, PC1_ABS_PEARSON) -----
+(IRNT, original): Significant correlation, p = 0.00279520717549432
+(IRNT, original): Spearman rho = -0.250601481227792
+----- Working on (MEAN_ABS_PP_CORS, RANK_PC1_COS_SIM) -----
+Ties detected, using exact = FALSE...
+Ties detected, using exact = FALSE...
+(IRNT, original): Significant correlation, p = 0.000344161675047591
+(IRNT, original): Spearman rho = -0.297256570764424
+----- Working on (MEAN_ABS_PP_CORS, RANK_PC1_PEARSON) -----
+Ties detected, using exact = FALSE...
+(Raw, original 1st visit): Significant correlation, p = 0.00119817359717351
+(Raw, original 1st visit): Spearman rho = -0.270114681572173
+Ties detected, using exact = FALSE...
+(IRNT, original): Significant correlation, p = 0.000344161675047591
+(IRNT, original): Spearman rho = -0.297256570764424
+----- Working on (MEAN_ABS_PP_CORS, EVEN_COS_SIM) -----
+----- Working on (MEAN_ABS_PP_CORS, EVEN_PEARSON) -----
+----- Working on (MEAN.DELTA.R2, PC1_ABS_COS_SIM) -----
+(Raw, original 1st visit): Significant correlation, p = 0.000266672856151618
+(Raw, original 1st visit): Spearman rho = 0.303780127573954
+(IRNT, original): Significant correlation, p = 2.62657845605497e-07
+(IRNT, original): Spearman rho = 0.42111391754784
+----- Working on (MEAN.DELTA.R2, PC1_ABS_PEARSON) -----
+(Raw, original 1st visit): Significant correlation, p = 6.60731791357315e-07
+(Raw, original 1st visit): Spearman rho = 0.407757181386189
+(IRNT, original): Significant correlation, p = 2.59897377747131e-07
+(IRNT, original): Spearman rho = 0.421263752729141
+----- Working on (MEAN.DELTA.R2, RANK_PC1_COS_SIM) -----
+Ties detected, using exact = FALSE...
+Ties detected, using exact = FALSE...
+(IRNT, original): Significant correlation, p = 0.000443271507568554
+(IRNT, original): Spearman rho = 0.291964384956664
+----- Working on (MEAN.DELTA.R2, RANK_PC1_PEARSON) -----
+Ties detected, using exact = FALSE...
+(Raw, original 1st visit): Significant correlation, p = 0.00157949663681241
+(Raw, original 1st visit): Spearman rho = 0.263712789514547
+Ties detected, using exact = FALSE...
+(IRNT, original): Significant correlation, p = 0.000443271507568554
+(IRNT, original): Spearman rho = 0.291964384956664
+----- Working on (MEAN.DELTA.R2, EVEN_COS_SIM) -----
+(Raw, original 1st visit): Significant correlation, p = 0.00154831031988694
+(Raw, original 1st visit): Spearman rho = -0.264964253606747
+----- Working on (MEAN.DELTA.R2, EVEN_PEARSON) -----
+
+> # Convert to dataframe and include sensitivity metrics as a new feature column
+> orig_rp_perf_vs_strat_corr_array <- as.data.frame(orig_rp_perf_vs_s .... [TRUNCATED] 
+
+> orig_rp_perf_vs_strat_corr_array$PERFORMANCE_METRIC <- rownames(orig_rp_perf_vs_strat_corr_array)
+
+> orig_rp_perf_vs_strat_pvals_array <- as.data.frame(orig_rp_perf_vs_strat_pvals_array)
+
+> orig_rp_perf_vs_strat_pvals_array$PERFORMANCE_METRIC <- rownames(orig_rp_perf_vs_strat_pvals_array)
+
+> IRNT_rp_perf_vs_strat_corr_array <- as.data.frame(IRNT_rp_perf_vs_strat_corr_array)
+
+> IRNT_rp_perf_vs_strat_corr_array$PERFORMANCE_METRIC <- rownames(IRNT_rp_perf_vs_strat_corr_array)
+
+> IRNT_rp_perf_vs_strat_pvals_array <- as.data.frame(IRNT_rp_perf_vs_strat_pvals_array)
+
+> IRNT_rp_perf_vs_strat_pvals_array$PERFORMANCE_METRIC <- rownames(IRNT_rp_perf_vs_strat_pvals_array)
+
+> # Save files
+> readr::write_csv(orig_rp_perf_vs_strat_corr_array,
++                  file = paste0(user_defined_results_dir,
++                       .... [TRUNCATED] 
+[1mwrote[0m [32m1.00TB[0m in [36m 0s[0m, [32m127.10PB/s[0m                                                                                 
+> readr::write_csv(orig_rp_perf_vs_strat_pvals_array,
++                  file = paste0(user_defined_results_dir,
++                                "pva ..." ... [TRUNCATED] 
+[1mwrote[0m [32m1.00TB[0m in [36m 0s[0m, [32m38.13PB/s[0m                                                                                 
+> readr::write_csv(IRNT_rp_perf_vs_strat_corr_array,
++                  file = paste0(user_defined_results_dir,
++                                "pval ..." ... [TRUNCATED] 
+[1mwrote[0m [32m1.00TB[0m in [36m 0s[0m, [32m123.36PB/s[0m                                                                                 
+> readr::write_csv(IRNT_rp_perf_vs_strat_pvals_array,
++                  file = paste0(user_defined_results_dir,
++                                "pva ..." ... [TRUNCATED] 
+[1mwrote[0m [32m1.00TB[0m in [36m 0s[0m, [32m102.30PB/s[0m                                                                                 
+> sink()
