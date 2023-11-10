@@ -1,0 +1,90 @@
+
+
+
+import json
+import math
+
+import numpy
+from matplotlib import pyplot
+from matplotlib.lines import Line2D
+
+from ukb.common.polygenic_risk import polygenic_risk_score as get_common_prs
+
+def get_average(lists):
+    totals = [0] * len(lists[0])
+    counts = [0] * len(lists[0])
+    for group in lists:
+        for i, x in enumerate(group):
+            counts[i] += 1
+            if math.isnan(x):
+                continue
+            totals[i] += x
+    
+    return [x/y for x, y in zip(totals, counts)]
+
+def adjust_sizes(sizes, k=200):
+    ''' scale list of sizes onto log scale for plotting point sizes
+    
+    Many PRS plots show the number of loci as the plotted point size. But we 
+    can't use the raw point size, since that would give some points as size=1, 
+    and others as size=800, so we just log scale the sizes, but make sure the 
+    size=1 points are not log-scaled to 0, and give a max size too
+    
+    Args:
+        sizes: list of numbers to be scaled
+        k: required size when n=1000
+    '''
+    sizes = [x+1 for x in sizes]
+    sizes = numpy.clip(sizes, 1, None)  # min size is 1, otherwise size can be negative
+    sizes = numpy.log(sizes) + 0.2  # make min log size > 0
+    refsize = numpy.log(1000) / k  # set size=1000 scaled value to 1
+    return sizes / refsize
+
+def add_size_legend(ax, k=200):
+    ''' set legend for point sizes
+    '''
+    collection = ax.collections[0]
+    
+    marker = collection.legend_elements('sizes', num=4)[0][0].get_marker()
+    # system to get different sized points for another legend
+    labels = [1, 10, 100, 1000]
+    sizes = (adjust_sizes(labels)) ** 0.5
+    markers = [Line2D([0], [0], linestyle='None', marker=marker, color='gray', alpha=0.8, markersize=x) for x in sizes]
+    ax.legend(markers, labels, title='loci (n)', frameon=False, loc='upper left', 
+        fontsize=10, title_fontsize=10)
+
+def plot_rare_vs_common(p_thresholds, y_common, nloci, outpath='temp.pdf'):
+    ''' plot common PRS and rare PRS correlation by threshold on same plot
+    '''
+    k = 600
+    fig = pyplot.figure(figsize=(5, 5))
+    ax = fig.gca()
+    nloci = adjust_sizes(nloci, k)
+    color = '#1f77b4'
+    ax.scatter(-numpy.log10(-numpy.log10(p_thresholds)), y_common, nloci, 
+               color=color + 'cc', linewidth=2, edgecolor=color + 'ff')
+    
+    xticks = [1e-100, 1e-30, 1e-10, 1e-5]
+    ax.set_xticks(-numpy.log10(-numpy.log10(xticks)))
+    ax.set_xticklabels(['10$^{-100}$', '10$^{-30}$', '10$^{-10}$', '10$^{-5}$'])
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.set_xlabel('P-value threshold', fontsize=16)
+    ax.set_ylabel('Correlation with phenotype (R)', fontsize=16)
+    ax.set_ylim(0, 0.295)
+    ax.set_yticks([0, 0.1, 0.2])
+    ax.tick_params(width=0.8, length=5, labelsize=16)
+    
+    add_size_legend(ax, k)
+    
+    fig.savefig(outpath, transparent=True)
+
+with open('/home/jmcrae/prs_stats_for_alan.2023-10-18.json', 'rt') as handle:
+    results = json.load(handle)
+
+# average across all traits
+p_thresholds = get_average([[float(x) for x in results[t]] for t in results])
+common_r2 = get_average([[math.sqrt(results[t][x]['common_r2']) for x in results[t]] for t in results])
+nloci = get_average([[results[t][x]['nloci'] for x in results[t]] for t in results])
+
+plot_rare_vs_common(p_thresholds, common_r2, nloci, outpath='/home/jmcrae/prs_stats_for_alan.2023-10-18.pdf')
