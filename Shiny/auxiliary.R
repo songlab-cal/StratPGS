@@ -6,7 +6,7 @@ covar_cossim <- readr::read_csv('covar_cossim.csv')
 phenos_corrs <- readr::read_csv('phenos_corrs.csv')
 phenos_cossim <- readr::read_csv('phenos_cossim.csv')
 phenos_random_stats <- readr::read_csv('phenos_randomization_stats.csv')
-
+ukbb_table <- readr::read_csv('ukbb_table.csv')
 getCorrPlot <- function(x) {
   #covar.plot.list <- readRDS(file=paste0('plots/',x,'_plots.rds'))
   message(date(), ': Generating corrplot for ', x, '...')
@@ -110,6 +110,15 @@ getPhenoStats <- function(x) {
                                    'Incremental R2 p-value')
   return(list(TABLE = phenos.with.stats[,-1],
               SENTENCE = paste0('Below are some statistics for ', x,'.')))
+}
+
+summarizePheno <- function(name) {
+  message(date(), ': Generating summary list for ', name, '...')
+  target_row <- ukbb_table %>% subset(english_name==name)
+  return(list(No_Avail_PGS=target_row$no_avail_pgs,
+              Category=target_row$category,
+              Field=target_row$ukbb_field,
+              URL=paste0("https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=",target_row$ukbb_field)))
 }
 
 # x <- covar.ids[1]

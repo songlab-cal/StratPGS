@@ -6,7 +6,7 @@
 #
 #    https://urldefense.com/v3/__http://shiny.rstudio.com/__;!!HrbR-XT-OQ!XTLJTajDBjHW_UuUobS4sK4S3CRNVMaFJ-BCZ9r5D5J6N5W9fHD-aMs9XH_slXMvOf3NXHuQqAS0BJuXLg$ 
 #
-# This version dated: 2/14/23
+# This version dated: 11/14/23
 # 
 
 library(shiny)
@@ -14,8 +14,9 @@ library(shinythemes)
 library(shinyjs) # [TESTING]
 library(dplyr)
 library(ggplot2)
-#source('/clusterfs/nilah/alan/Shiny/test/auxiliary.R')
 source('auxiliary.R')
+
+phenos <- readr::read_csv("ukbb_table.csv")[["english_name"]]
 
 gPCs <- 1:40
 covar.ids <- readr::read_table('covariate_ids.txt', col_names=FALSE)$X1
@@ -29,8 +30,8 @@ ui <- fluidPage(
     tags$style(HTML("
 
       .selectize-input {
-        height: 50px;
-        width: 600px;
+        height: 35px;
+        width: 400px;
         font-size: 12pt;
         padding-top: 5px;
       }
@@ -45,13 +46,72 @@ ui <- fluidPage(
   sidebarLayout(
     # SIDE BAR PANEL
     sidebarPanel(
-      h3("Add Individual-level Data")
+      h3("Pick a Phenotype"),
+      p("You may also enter the phenotype manually"),
+      fluidRow(
+        column(7,selectInput(inputId = "pheno_selector",
+                             label = "Phenotype",
+                             choices = phenos))
+      ),
+      h3("Summary"),
+      h4("UK Biobank (UKB) Phenotype Metadata"),
+      uiOutput("phenoInfoSummary"),
+      uiOutput("UKBB_Reference"),
+      p("Explore stratification of phenotype under ", shiny::tags$b("Phenotype Stratification"), " tab"),
+      h4("Polygenic Scores (PGSs)"),
+      uiOutput("PGSSummary"),
+      uiOutput("zeroPGS")
+      
+      # fluidRow(
+      #   column(7,selectInput(inputId = "pgs_selector", 
+      #                        label = "Polygenic Score (PGS)", 
+      #                        choices = ""))
+      # )
+      
     ),
     # MAIN PANEL
     mainPanel(
       tabsetPanel(
+        # Phenotype Stratification
+        tabPanel("Phenotype Stratification",
+                 fluidRow(
+                   column(12,h3("Pick Phenotype Version"),
+                          # Input: Select dataset (in the future, build upload functionality)
+                          selectInput(inputId = "pheno",
+                                      label = "",
+                                      choices = pheno.names))
+                 ),
+                 p("Below summarizes the risks of stratification bias and statistical relationships with the top 40 genetics PCs for the selected phenotype."),
+                 fluidRow(column(6,h3("1. Cosine Similarity"),
+                                 plotOutput(outputId = "phenoCossimPlot")),
+                          column(6,h3("2. Pearson Correlation"),
+                                 plotOutput(outputId = "phenoCorrPlot")),
+                          uiOutput("phenoSentence"),
+                          tableOutput("phenoSummary"),
+                          actionButton("StabStatsShowBtn", "Show Details"), # [TESTING]
+                          actionButton("StabStatsHideBtn", "Hide Details"), # [TESTING]
+                          hidden(shiny::tags$ul(id = "stab_stats",
+                                                shiny::tags$li(p("The", shiny::tags$b("No. Slices Reporting Variant with Positive Probability"),
+                                                                 "measures how often the stable variant has a posterior probability larger than zero, when performing fine-mapping across all user-defined slices (five in total for this study).")), 
+                                                shiny::tags$li(p("Based on the quantity measured above,", 
+                                                                 shiny::tags$b("Max Slice-Slice F_ST"), 
+                                                                 "computes the maximum",
+                                                                 HTML(paste0(shiny::tags$i('F'),shiny::tags$sub('ST'))),
+                                                                 "(a measure of genetic differentiaton; see",
+                                                                 shiny::tags$a("Holsinger and Weir, 2009", href="https://urldefense.com/v3/__https://www.nature.com/articles/nrg2611__;!!HrbR-XT-OQ!XTLJTajDBjHW_UuUobS4sK4S3CRNVMaFJ-BCZ9r5D5J6N5W9fHD-aMs9XH_slXMvOf3NXHuQqAQl-Ko_rg$ "),
+                                                                 ") between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic differentiation.")), 
+                                                shiny::tags$li(p("Similarly,",
+                                                                 shiny::tags$b("Max Slice-Slice AF Difference"),
+                                                                 "computes the maximum",
+                                                                 shiny::tags$i('mean allele frequency difference'),
+                                                                 "(a measure of genetic heterogeneity) between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic heterogeneity."))
+                          ))),
+        ),
+        
+        # Panel: PGS Stratification
+        tabPanel("PGS Stratification"),
         # Panel: Exogenous Covariates (age, sex, etc.)
-        tabPanel("Exogenous Covariates",
+        tabPanel("Exogenous Covariates (Beta)",
                  # Let user choose Covariate
                  fluidRow(
                    h3("Pick a Covariate"),
@@ -93,46 +153,11 @@ ui <- fluidPage(
                    )
                 )
         ), 
-        # Phenotypes
-        tabPanel("Phenotypes",
-                 fluidRow(
-                   column(12,h3("Pick a Phenotype"),
-                   # Input: Select dataset (in the future, build upload functionality)
-                   selectInput(inputId = "pheno",
-                               label = "",
-                               choices = pheno.names))
-                 ),
-                 p("Below summarizes the risks of stratification bias and statistical relationships with the top 40 genetics PCs for the selected phenotype."),
-                 fluidRow(column(6,h3("1. Cosine Similarity"),
-                                 plotOutput(outputId = "phenoCossimPlot")),
-                          column(6,h3("2. Pearson Correlation"),
-                                 plotOutput(outputId = "phenoCorrPlot")),
-                          uiOutput("phenoSentence"),
-                          tableOutput("phenoSummary"),
-                          actionButton("StabStatsShowBtn", "Show Details"), # [TESTING]
-                          actionButton("StabStatsHideBtn", "Hide Details"), # [TESTING]
-                          hidden(shiny::tags$ul(id = "stab_stats",
-                                                shiny::tags$li(p("The", shiny::tags$b("No. Slices Reporting Variant with Positive Probability"),
-                                                                 "measures how often the stable variant has a posterior probability larger than zero, when performing fine-mapping across all user-defined slices (five in total for this study).")), 
-                                                shiny::tags$li(p("Based on the quantity measured above,", 
-                                                                 shiny::tags$b("Max Slice-Slice F_ST"), 
-                                                                 "computes the maximum",
-                                                                 HTML(paste0(shiny::tags$i('F'),shiny::tags$sub('ST'))),
-                                                                 "(a measure of genetic differentiaton; see",
-                                                                 shiny::tags$a("Holsinger and Weir, 2009", href="https://urldefense.com/v3/__https://www.nature.com/articles/nrg2611__;!!HrbR-XT-OQ!XTLJTajDBjHW_UuUobS4sK4S3CRNVMaFJ-BCZ9r5D5J6N5W9fHD-aMs9XH_slXMvOf3NXHuQqAQl-Ko_rg$ "),
-                                                                 ") between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic differentiation.")), 
-                                                shiny::tags$li(p("Similarly,",
-                                                                 shiny::tags$b("Max Slice-Slice AF Difference"),
-                                                                 "computes the maximum",
-                                                                 shiny::tags$i('mean allele frequency difference'),
-                                                                 "(a measure of genetic heterogeneity) between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic heterogeneity."))
-                          ))),
-        ),
         # Summary of Approach
-        tabPanel("Summary",
+        tabPanel("Methodology",
                  h3("Cohort"),
                  p("We use 502,506 individuals from the UK Biobank."),
-                 h3("Other Details"),
+                 h3("Relative Performance"),
                  p("To be added.")
         )
       )
@@ -142,6 +167,22 @@ ui <- fluidPage(
 
 # Define server logic 
 server <- function(input, output, session) {
+  # Enable selection of PGS matched to a selected phenotype
+  observeEvent(input$pheno_selector, {
+    message("Table event observed -- phenotype selected")
+    no_avail_pgs <- (ukbb_table %>% 
+      subset(english_name==input$pheno_selector))[["no_avail_pgs"]]
+    if (no_avail_pgs == 0) {
+      choices <- NA
+    } else if (no_avail_pgs == 1) {
+      choices <- "Clumping and thresholding (lenient)"
+    } else if (no_avail_pgs == 2) {
+      choices <- c("Clumping and thresholding (lenient)",
+                   "Clumping and thresholding (stringent)")
+    }
+    updateSelectInput(session, "pgs_selector", choices = choices)
+  })
+  
   # Enable hiding and revealing of functional plots (Genome-wide tab) # [TESTING]
   observeEvent(input$funcAnnotPlotShowBtn,
                {show("funcAnnotPlot")})
@@ -164,6 +205,55 @@ server <- function(input, output, session) {
                {show("geneExpressionSumTab")})
   observeEvent(input$geneExpressionHideBtn,
                {hide("geneExpressionSumTab")})
+  
+  # Information about Phenotype (1)
+  summarizedPheno <- reactive({
+    req(input$pheno_selector)
+    summarizePheno(name=input$pheno_selector)
+  })
+  
+  output$phenoInfoSummary <- renderUI({
+    category <- req(try(summarizedPheno()[["Category"]]))
+    field <- summarizedPheno()[["Field"]]
+    line_1 <- paste0("Category: ", category)
+    line_2 <- paste0("UKB Field: ", field)
+    HTML(paste(line_1, line_2, sep = '<br/>'))
+  })
+  
+  output$PGSSummary <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==1) {
+      line_1 <- paste0("There is ", no_avail_pgs, " available for phenotype selected.")
+      line_2 <- "Select PGS below to explore metrics."
+      HTML(paste(line_1,line_2,sep='<br/>'))
+    } else if (no_avail_pgs > 1) { 
+      line_1 <- paste0("There are ", no_avail_pgs, " available for phenotype selected.")
+      line_2 <- "Choose a PGS below to explore metrics."
+      HTML(paste(line_1,line_2,sep='<br/>'))
+      } else {
+      HTML("No PGSs generated for phenotype selected.")
+    }
+  })
+  
+  output$zeroPGS <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      return()
+    } else {
+      fluidRow(
+        column(7,selectInput(inputId = "pgs_selector", 
+                             label = "Polygenic Score (PGS)", 
+                             choices = ""))
+      )
+    }
+  })
+  
+  # Information about Phenotype (2)
+  # URL to UKBB Data Portal
+  output$UKBB_Reference <- renderUI(a(href=summarizedPheno()[["URL"]], 
+                                          "Reference", 
+                                          target="_blank"))
+  
   # Plots for covariate
   output$cossimPlot <- renderPlot(req(try(plot(getCossimPlot(x=input$covar) + theme(text=element_text(family='DejaVu Sans'))))))
   output$corrPlot <- renderPlot(req(try(plot(getCorrPlot(x=input$covar) + theme(text=element_text(family='DejaVu Sans'))))))
