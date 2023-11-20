@@ -81,6 +81,7 @@ ui <- fluidPage(
                                       label = "",
                                       choices = pheno.names))
                  ),
+                 h4("Cohort"),
                  p("Below summarizes the risks of stratification bias and statistical relationships with the top 40 genetics PCs for the selected phenotype."),
                  fluidRow(column(6,h3("1. Cosine Similarity"),
                                  plotOutput(outputId = "phenoCossimPlot")),
