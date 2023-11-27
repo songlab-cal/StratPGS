@@ -22,35 +22,41 @@ gPCs <- 1:40
 covar.ids <- readr::read_table('covariate_ids.txt', col_names=FALSE)$X1
 pheno.names <- readr::read_table('phenos_names.txt', col_names=FALSE)$X1
 
-# Define UI for application that draws a histogram
+# Define UI 
 ui <- fluidPage(
   useShinyjs(), # [TESTING]
   theme = shinytheme("cosmo"),
+  withMathJax(),
+  tags$div(HTML("<script type='text/x-mathjax-config'>
+                MathJax.Hub.Config({
+                tex2jax: {inlineMath: [['$','$']]}
+                });
+                </script>
+                ")),
   tags$head(
     tags$style(HTML("
-
       .selectize-input {
         height: 35px;
         width: 400px;
         font-size: 12pt;
         padding-top: 5px;
       }
-
     "))
   ),
   # Application title
   titlePanel("Polygenic Scores and Stratification Through the Lens of Principal Components"),
   p("Created by: Alan Aw"),
-  p("To learn more about our work, check out our preprint."),
+  p("To learn more about our work, check out our preprint: Alan Aw, Jeremy McRae, Elior Rahmani and Yun Song. (2023+) 'The pitfalls of overparameterized polygenic scores and new diagnostics to combat overfitting.' (in preparation). We recommend browsing this app on a Desktop for optimal user experience."),
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     # SIDE BAR PANEL
     sidebarPanel(
+      HTML('<center><img src="visualization.png" width="300"></center>'),
+      HTML('<center>High-dimensional statistics meets human genetics, in the style of Володи́мирч Та́тлін.</center>'),
       h3("Pick a Phenotype"),
-      p("You may also enter the phenotype manually"),
       fluidRow(
         column(7,selectInput(inputId = "pheno_selector",
-                             label = "Phenotype",
+                             label = "",
                              choices = phenos))
       ),
       h3("Summary"),
@@ -74,43 +80,47 @@ ui <- fluidPage(
       tabsetPanel(
         # Phenotype Stratification
         tabPanel("Phenotype Stratification",
+                 p(""),
+                 p("We analyze population stratification of the phenotype on a cohort of 487,296 individuals, mostly of self-identified European ancestry."),
                  fluidRow(
                    column(12,h3("Pick Phenotype Version"),
                           # Input: Select dataset (in the future, build upload functionality)
-                          selectInput(inputId = "pheno",
+                          selectInput(inputId = "pheno_version_selector",
                                       label = "",
-                                      choices = pheno.names))
+                                      choices = c("Original", 
+                                                  "Inverse Rank Normal Transformed")))
                  ),
-                 h4("Cohort"),
-                 p("Below summarizes the risks of stratification bias and statistical relationships with the top 40 genetics PCs for the selected phenotype."),
-                 fluidRow(column(6,h3("1. Cosine Similarity"),
+                 h3("Stratification Information"),
+                 p("Below summarizes stratification bias and relationships with the top 40 genetic PCs (gPCs) for the selected phenotype and version choice."),
+                 fluidRow(column(6,h4("1. Cosine Similarity Profile"),
                                  plotOutput(outputId = "phenoCossimPlot")),
-                          column(6,h3("2. Pearson Correlation"),
+                          column(6,h4("2. Pearson Correlation Profile"),
                                  plotOutput(outputId = "phenoCorrPlot")),
-                          uiOutput("phenoSentence"),
+                          h4(uiOutput("phenoSentence")),
                           tableOutput("phenoSummary"),
-                          actionButton("StabStatsShowBtn", "Show Details"), # [TESTING]
-                          actionButton("StabStatsHideBtn", "Hide Details"), # [TESTING]
-                          hidden(shiny::tags$ul(id = "stab_stats",
-                                                shiny::tags$li(p("The", shiny::tags$b("No. Slices Reporting Variant with Positive Probability"),
-                                                                 "measures how often the stable variant has a posterior probability larger than zero, when performing fine-mapping across all user-defined slices (five in total for this study).")), 
-                                                shiny::tags$li(p("Based on the quantity measured above,", 
-                                                                 shiny::tags$b("Max Slice-Slice F_ST"), 
-                                                                 "computes the maximum",
-                                                                 HTML(paste0(shiny::tags$i('F'),shiny::tags$sub('ST'))),
-                                                                 "(a measure of genetic differentiaton; see",
-                                                                 shiny::tags$a("Holsinger and Weir, 2009", href="https://urldefense.com/v3/__https://www.nature.com/articles/nrg2611__;!!HrbR-XT-OQ!XTLJTajDBjHW_UuUobS4sK4S3CRNVMaFJ-BCZ9r5D5J6N5W9fHD-aMs9XH_slXMvOf3NXHuQqAQl-Ko_rg$ "),
-                                                                 ") between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic differentiation.")), 
+                          actionButton("PhenoStratShowBtn", "Show Details"), # [TESTING]
+                          actionButton("PhenoStratHideBtn", "Hide Details"), # [TESTING]
+                          hidden(shiny::tags$ul(id = "pheno_strat_details",
+                                                shiny::tags$li(p("The", shiny::tags$b("Cosine Similarity Profile"), 
+                                                                 "and", shiny::tags$b("Pearson Correlation Profile"),
+                                                                 "summarize empirical distributions of cosine similarities and Pearson correlations between the phenotype vector and the gPC vectors. The gPC with the largest magnitude is coloured red.")), 
+                                                shiny::tags$li(p(shiny::tags$b("Cosine Similarity Evenness"), 
+                                                                 "computes the Shannon entropy of the 40 unsigned and normalized cosine similarities. Namely, if $(x_1,\\ldots,x_{40})$ denote the cosine similarities with the 40 gPCs as shown in the left plot above, then let $y_i=|x_i|/(|x_1|+\\ldots+|x_{40}|)$ be the unsigned and normalized cosine similarity with the $i$th gPC, so that $y_1+\\ldots+y_{40}=1$. The Shannon entropy is $\\sum_{i=1}^{40}y_i\\log (1/y_i)$, which captures the evenness of the distribution of cosine similarities. Larger values imply greater evenness (Max $=\\log(40)\\approx 3.69$; Min = $0$).")), 
                                                 shiny::tags$li(p("Similarly,",
-                                                                 shiny::tags$b("Max Slice-Slice AF Difference"),
-                                                                 "computes the maximum",
-                                                                 shiny::tags$i('mean allele frequency difference'),
-                                                                 "(a measure of genetic heterogeneity) between any pair of slices for which the variant has a positive posterior probability. Larger values imply greater genetic heterogeneity."))
+                                                                 shiny::tags$b("Pearson r Evenness"),
+                                                                 "computes the Shannon entropy of the 40 unsigned and normalized Pearson correlations. Larger values imply greater evenness (Max $=\\log(40)\\approx 3.69$; Min = $0$).")),
+                                                shiny::tags$li(p(shiny::tags$b("Mean Incremental R\u00B2"), 
+                                                                 "reports the average incremental R\u00B2, across 200 random polygenic scores (rPGSs) constructed by arbitrarily choosing 10% of all autosomal variants and independently assigning standard Gaussian effects to them (i.e., $\\beta_j\\sim N(0,1)$ for variant $j$ chosen). For each rPGS, R\u00B2 was computed on a linear model including the rPGS, alongside age, sex and the top 20 gPCs. This is subtracted by the baseline model including just the latter covariates, to obtain the Incremental R\u00B2.")),
+                                                shiny::tags$li(p(shiny::tags$b("Incremental R\u00B2 p-value "), 
+                                                                 "reports the significance of the Mean Incremental R\u00B2 described previously. Significance is obtained by permuting the phenotypes randomly across the individuals, and repeating the same procedure of computing average incremental R\u00B2, for 100 times. The empirical p-value reports the fraction of permuted Mean Incremental R\u00B2's that beat the observed. A smaller p-value indicates greater significance of the observed Mean Incremental R\u00B2.")) 
+                                                
+                                                
                           ))),
         ),
         
         # Panel: PGS Stratification
-        tabPanel("PGS Stratification"),
+        tabPanel("PGS Stratification",
+                 ),
         # Panel: Exogenous Covariates (age, sex, etc.)
         tabPanel("Exogenous Covariates (Beta)",
                  # Let user choose Covariate
@@ -132,8 +142,8 @@ ui <- fluidPage(
                                                      column(3,uiOutput(outputId = "PICS2StableDBSNP")))),
                                      column(6,h3("2. Pearson Correlation"),
                                             plotOutput(outputId = "corrPlot"),
-                                            actionButton("StabStatsShowBtn", "Show Details"), # [TESTING]
-                                            actionButton("StabStatsHideBtn", "Hide Details"), # [TESTING]
+                                            actionButton("PhenoStratShowBtn", "Show Details"), # [TESTING]
+                                            actionButton("PhenoStratHideBtn", "Hide Details"), # [TESTING]
                                             hidden(shiny::tags$ul(id = "stab_stats",
                                               shiny::tags$li(p("The", shiny::tags$b("No. Slices Reporting Variant with Positive Probability"),
                                                                "measures how often the stable variant has a posterior probability larger than zero, when performing fine-mapping across all user-defined slices (five in total for this study).")), 
@@ -196,10 +206,10 @@ server <- function(input, output, session) {
                {hide("funcDensityPlot")})
   
   # Enable hiding and showing of stability statistics details (Single gene tab) # [TESTING]
-  observeEvent(input$StabStatsShowBtn,
-               {show("stab_stats")})
-  observeEvent(input$StabStatsHideBtn,
-               {hide("stab_stats")})
+  observeEvent(input$PhenoStratShowBtn,
+               {show("pheno_strat_details")})
+  observeEvent(input$PhenoStratHideBtn,
+               {hide("pheno_strat_details")})
   
   # Enable hiding and showing of gene expression table (Side panel) # [TESTING]
   observeEvent(input$geneExpressionShowBtn,
@@ -243,7 +253,7 @@ server <- function(input, output, session) {
     } else {
       fluidRow(
         column(7,selectInput(inputId = "pgs_selector", 
-                             label = "Polygenic Score (PGS)", 
+                             label = "", 
                              choices = ""))
       )
     }
@@ -260,12 +270,17 @@ server <- function(input, output, session) {
   output$corrPlot <- renderPlot(req(try(plot(getCorrPlot(x=input$covar) + theme(text=element_text(family='DejaVu Sans'))))))
   
   # Plots for phenotype
-  output$phenoCossimPlot <- renderPlot(req(try(plot(getPhenoCossimPlot(x=input$pheno) + theme(text=element_text(family='DejaVu Sans'))
+  output$phenoCossimPlot <- renderPlot(req(try(plot(getPhenoCossimPlot(x=input$pheno_selector,
+                                                                       y=input$pheno_version_selector) + 
+                                                      theme(text=element_text(family='DejaVu Sans'))
                                                     ))))
-  output$phenoCorrPlot <- renderPlot(req(try(plot(getPhenoCorrPlot(x=input$pheno) + theme(text=element_text(family='DejaVu Sans'))))))
+  output$phenoCorrPlot <- renderPlot(req(try(plot(getPhenoCorrPlot(x=input$pheno_selector,
+                                                                   y=input$pheno_version_selector) + 
+                                                    theme(text=element_text(family='DejaVu Sans'))))))
   
   # Table for phenotype
-  phenoStats <- reactive({getPhenoStats(x=input$pheno)})
+  phenoStats <- reactive({getPhenoStats(x=input$pheno_selector,
+                                        y=input$pheno_version_selector)})
   output$phenoSummary <- renderTable(req(try(phenoStats()$TABLE)), 
                                      digits = 4,
                                      rownames = TRUE)

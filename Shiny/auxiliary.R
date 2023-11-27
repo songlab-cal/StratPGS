@@ -52,15 +52,23 @@ getCossimPlot <- function(x) {
   return(cossim.plot)
 }
 
-getPhenoCorrPlot <- function(x) {
+#' Get Phenotype Pearson Correlation plot
+#' 
+getPhenoCorrPlot <- function(x,y) {
   #covar.plot.list <- readRDS(file=paste0('plots/',x,'_plots.rds'))
-  message(date(), ': Generating corrplot for ', x, '...')
-  corr.with.gpcs <- phenos_corrs %>% subset(PHENOTYPE == x)
-  melted.corr.with.gpcs <- reshape2::melt(corr.with.gpcs,id.vars = 'PHENOTYPE')
-  melted.corr.with.gpcs$value <- as.numeric(melted.corr.with.gpcs$value)
-  melted.corr.with.gpcs$max_mag <- abs(melted.corr.with.gpcs$value) == max(abs(melted.corr.with.gpcs$value))
+  message(date(), ': Generating correlation plot for ', x, ' (',y,')...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  relevant_name <- ifelse(y=='Original', 
+                          relevant_row$orig_name,
+                          relevant_row$irnt_name)
+  corr_with_gpcs <- phenos_corrs %>% subset(PHENOTYPE==relevant_name)
+  melted_corr_with_gpcs <- reshape2::melt(corr_with_gpcs,id.vars='PHENOTYPE')
+  melted_corr_with_gpcs$value <- as.numeric(melted_corr_with_gpcs$value)
+  melted_corr_with_gpcs$max_mag <- abs(melted_corr_with_gpcs$value) == 
+    max(abs(melted_corr_with_gpcs$value))
   
-  corr.plot <- ggplot(melted.corr.with.gpcs, aes(x = variable, y = value)) +
+  corr_plot <- ggplot(melted_corr_with_gpcs, aes(x=variable,
+                                                 y=value)) +
     geom_bar(stat = 'identity',
              aes(fill = max_mag)) + 
     theme_bw() +
@@ -71,18 +79,26 @@ getPhenoCorrPlot <- function(x) {
           plot.title = element_text(hjust = 0.5),
           legend.position = 'none') +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
-  return(corr.plot)
+  return(corr_plot)
 }
 
-getPhenoCossimPlot <- function(x) {
+#' Get Phenotype Cosine Similarity plot
+#' 
+getPhenoCossimPlot <- function(x,y) {
   #covar.plot.list <- readRDS(file=paste0('plots/',x,'_plots.rds'))
-  message(date(), ': Generating cosine similarity plot for ', x, '...')
-  cossim.with.gpcs <- phenos_cossim %>% subset(PHENOTYPE == x)
-  melted.cossim.with.gpcs <- reshape2::melt(cossim.with.gpcs,id.vars = 'PHENOTYPE')
-  melted.cossim.with.gpcs$value <- as.numeric(melted.cossim.with.gpcs$value)
-  melted.cossim.with.gpcs$max_mag <- abs(melted.cossim.with.gpcs$value) == max(abs(melted.cossim.with.gpcs$value))
+  message(date(), ': Generating cosine similarity plot for ', x, ' (',y,')...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  relevant_name <- ifelse(y=='Original', 
+                          relevant_row$orig_name,
+                          relevant_row$irnt_name)
+  cossim_with_gpcs <- phenos_cossim %>% subset(PHENOTYPE==relevant_name)
+  melted_cossim_with_gpcs <- reshape2::melt(cossim_with_gpcs,id.vars='PHENOTYPE')
+  melted_cossim_with_gpcs$value <- as.numeric(melted_cossim_with_gpcs$value)
+  melted_cossim_with_gpcs$max_mag <- abs(melted_cossim_with_gpcs$value)==
+    max(abs(melted_cossim_with_gpcs$value))
   
-  cossim.plot<- ggplot(melted.cossim.with.gpcs, aes(x = variable, y = value)) +
+  cossim_plot<- ggplot(melted_cossim_with_gpcs, aes(x=variable, 
+                                                    y=value)) +
     geom_bar(stat = 'identity',
              aes(fill = max_mag)) + 
     theme_bw() +
@@ -93,23 +109,35 @@ getPhenoCossimPlot <- function(x) {
           plot.title = element_text(hjust = 0.5),
           legend.position = 'none') +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
-  return(cossim.plot)
+  return(cossim_plot)
 }
 
-getPhenoStats <- function(x) {
-  message(date(), ': Generating statistics for ', x, '...')
-  phenos.with.stats <- phenos_random_stats %>% 
-    subset(PHENOTYPE == x) %>% 
+#' Get Phenotype stratification summary statistics
+#' 
+getPhenoStats <- function(x,y) {
+  message(date(), ': Generating phenotype stratification statistics for ', x, ' (',y,')...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  relevant_name <- ifelse(y=='Original', 
+                          relevant_row$orig_name,
+                          relevant_row$irnt_name)
+  phenos_with_stats <- phenos_random_stats %>% 
+    subset(PHENOTYPE==relevant_name) %>% 
     as.data.frame()
-  colnames(phenos.with.stats) <- c('Phenotype',
+  colnames(phenos_with_stats) <- c('Phenotype',
                                    'Cosine Similarity Evenness',
                                    'Pearson r Evenness',
                                    'Max Prevalence-Percentile Slope',
                                    'Slope p-value',
-                                   'Mean Incremental R2',
-                                   'Incremental R2 p-value')
-  return(list(TABLE = phenos.with.stats[,-1],
-              SENTENCE = paste0('Below are some statistics for ', x,'.')))
+                                   'Mean Incremental R\u00B2',
+                                   'Incremental R\u00B2 p-value')
+  phenos_with_stats[['Mean Incremental R\u00B2']] <- format(
+    phenos_with_stats[['Mean Incremental R\u00B2']],
+    scientific=TRUE)
+  phenos_with_stats[['Incremental R\u00B2 p-value']] <- format(
+    phenos_with_stats[['Incremental R\u00B2 p-value']],
+    scientific=TRUE)
+  return(list(TABLE = phenos_with_stats[,c(2:3,6:7)],
+              SENTENCE = paste0('3. Other Statistics for ', x, ' (',y,').')))
 }
 
 summarizePheno <- function(name) {
