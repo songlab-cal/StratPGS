@@ -149,6 +149,24 @@ summarizePheno <- function(name) {
               URL=paste0("https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=",target_row$ukbb_field)))
 }
 
+#' Get PGS stratification summary statistics
+#' x = PGS method
+#' 
+getPGSStratStats <- function(x) {
+  # no. variants in PGS
+  # distribution across autosomes
+  # PC-related stratification metrics x 11
+  # performance metrics 
+}
+
+#' Get PGS summary statistics
+#' x = PGS method
+#' y = cutoff
+getPGSStats <- function(x) {
+  # sensitivity metrics (matched to performance metrics)
+  # fixed-perturbed architecture
+}
+
 # x <- covar.ids[1]
 # plots <- getPCPlots(x)
 # getwd()

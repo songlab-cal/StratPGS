@@ -120,6 +120,8 @@ ui <- fluidPage(
         
         # Panel: PGS Stratification
         tabPanel("PGS Stratification",
+                 p(""),
+                 p("We analyze population stratification of the PGS on a cohort of 487,296 individuals, mostly of self-identified European ancestry."),
                  ),
         # Panel: Exogenous Covariates (age, sex, etc.)
         tabPanel("Exogenous Covariates (Beta)",
@@ -265,6 +267,16 @@ server <- function(input, output, session) {
                                           "Reference", 
                                           target="_blank"))
   
+  # Information about PGS (1)
+  output$PGSmsg <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      HTML("No PGS data for chosen phenotype.")
+    } else {
+      HTML("We analyze population stratification of the PGS on its training cohort of 487,296 .")
+    }
+  })
+  
   # Plots for covariate
   output$cossimPlot <- renderPlot(req(try(plot(getCossimPlot(x=input$covar) + theme(text=element_text(family='DejaVu Sans'))))))
   output$corrPlot <- renderPlot(req(try(plot(getCorrPlot(x=input$covar) + theme(text=element_text(family='DejaVu Sans'))))))
@@ -286,7 +298,10 @@ server <- function(input, output, session) {
                                      rownames = TRUE)
   output$phenoSentence <- renderUI(req(try(phenoStats()$SENTENCE)))
   
-  # Gene Expression metadata
+  # PGS Data 
+  pgsStats <- reactive({getPGSStats})
+  
+  # Gene Expression metadata [!]
   output$geneExpressionPlot <- renderPlot(req(try(summarizeGeneExp(chr=input$table_selector, 
                                                                    input.gene.name=input$gene_selector)[['PLOT']])))
   output$geneExpressionSumTab <- renderTable(req(try(summarizeGeneExp(chr=input$table_selector, 
