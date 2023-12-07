@@ -157,6 +157,7 @@ getPGSStratStats <- function(x) {
   # distribution across autosomes
   # PC-related stratification metrics x 11
   # performance metrics 
+  
 }
 
 #' Get PGS summary statistics

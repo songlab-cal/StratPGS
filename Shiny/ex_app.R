@@ -121,7 +121,8 @@ ui <- fluidPage(
         # Panel: PGS Stratification
         tabPanel("PGS Stratification",
                  p(""),
-                 p("We analyze population stratification of the PGS on a cohort of 487,296 individuals, mostly of self-identified European ancestry."),
+                 p(uiOutput("PGSmsg")),
+                 
                  ),
         # Panel: Exogenous Covariates (age, sex, etc.)
         tabPanel("Exogenous Covariates (Beta)",
@@ -273,7 +274,7 @@ server <- function(input, output, session) {
     if (no_avail_pgs==0) {
       HTML("No PGS data for chosen phenotype.")
     } else {
-      HTML("We analyze population stratification of the PGS on its training cohort of 487,296 .")
+      HTML("We analyze population stratification of the PGS on its training cohort of 288,728 individuals of European descent.")
     }
   })
   
