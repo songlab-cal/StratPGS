@@ -22,6 +22,18 @@ gPCs <- 1:40
 covar.ids <- readr::read_table('covariate_ids.txt', col_names=FALSE)$X1
 pheno.names <- readr::read_table('phenos_names.txt', col_names=FALSE)$X1
 
+lenient_cutoff_choices <- c(1e-8,1e-7,1e-6)
+stringent_cutoff_choices <- c(1e-10)
+
+perf_metric_df <- data.frame(english_name = c("",
+                                              "",
+                                              "",
+                                              ""),
+                             internal_name = c("",
+                                               "",
+                                               "",
+                                               ""))
+
 # Define UI 
 ui <- fluidPage(
   useShinyjs(), # [TESTING]
@@ -52,7 +64,7 @@ ui <- fluidPage(
     # SIDE BAR PANEL
     sidebarPanel(
       HTML('<center><img src="visualization.png" width="300"></center>'),
-      HTML('<center>High-dimensional statistics meets human genetics, in the style of Володи́мирч Та́тлін.</center>'),
+      HTML('<center>High-dimensional statistics meets human genetics.</center>'),
       h3("Pick a Phenotype"),
       fluidRow(
         column(7,selectInput(inputId = "pheno_selector",
@@ -121,12 +133,28 @@ ui <- fluidPage(
         # Panel: PGS Stratification
         tabPanel("PGS Stratification",
                  p(""),
+                 h3("Stratification and Quick Overview"),
                  p(uiOutput("PGSmsg")),
-                 h4("1. Quick Overview"),
                  p(uiOutput("pgsSentence")),
-                 plotOutput(outputId = "pgsStratPlot"),
-                 h4("2. Stratification Statistics"),
-                 tableOutput("pgsStratSummary") # [!] To do: Fix the table (do a 3 x 4?)
+                 fluidRow(
+                   id="strat_diagnosis",
+                   column(5,
+                          h4(uiOutput("pgsChromDistSentence")),
+                          plotOutput(outputId = "pgsStratPlot")),
+                   column(7,h4(uiOutput("pgsStratSentence")),
+                          tableOutput("pgsStratSummary"))
+                 ),
+                 h3("Performance Sensitivity and Polygenic Architecture"),
+                 p(uiOutput("ifnoPGS")),
+                 uiOutput("PGScutoffselect")
+                 # selectInput(inputId = "pgs_cutoff_selector",
+                 #             label = "",
+                 #             choices = c(1e-6,1e-7,1e-8))
+                 #h4("1. Quick Overview"),
+                 #p(uiOutput("pgsSentence")),
+                 #plotOutput(outputId = "pgsStratPlot"),
+                 #h4("2. Stratification Statistics"),
+                 #tableOutput("pgsStratSummary") # [!] To do: Fix the table (do a 3 x 4?)
                  # [!] Possibility: combine the table and the plot in one row
                  # [!]              add second row that allows selection of performance metric 
                  #                  (view plot and sensitivity)
@@ -270,6 +298,29 @@ server <- function(input, output, session) {
     }
   })
   
+  # PGS cutoff selector
+  output$PGScutoffselect <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]] 
+    if (no_avail_pgs==0) {
+      return(NULL)
+    } else {
+      pgs_type <- req(try(input$pgs_selector))
+      if (pgs_type=="Clumping and thresholding (lenient)") {
+        fluidRow(
+          column(5,selectInput(inputId = "pgs_cutoff_selector", 
+                               label = "Select perturbation cutoff", 
+                               choices = c(1e-6,1e-7,1e-8)))
+        )
+      } else if (pgs_type=="Clumping and thresholding (stringent)") {
+        fluidRow(
+          column(5,selectInput(inputId = "pgs_cutoff_selector", 
+                               label = "Select perturbation cutoff", 
+                               choices = c(1e-10)))
+        )
+      }
+    }
+  })
+  
   # Information about Phenotype (2)
   # URL to UKBB Data Portal
   output$UKBB_Reference <- renderUI(a(href=summarizedPheno()[["URL"]], 
@@ -283,6 +334,15 @@ server <- function(input, output, session) {
       HTML("No PGS data for chosen phenotype.")
     } else {
       HTML("We analyze population stratification of the PGS on its training cohort of 288,728 individuals of European descent.")
+    }
+  })
+  
+  output$ifnoPGS <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      HTML("Not Applicable for chosen phenotype.")
+    } else {
+      HTML("We analyze sensitivity of the PGS on a held-out test cohort of 68,931 individuals of European descent.")
     }
   })
   
@@ -304,18 +364,26 @@ server <- function(input, output, session) {
                                         y=input$pheno_version_selector)})
   output$phenoSummary <- renderTable(req(try(phenoStats()$TABLE)), 
                                      digits = 4,
-                                     rownames = TRUE)
+                                     bordered = TRUE)
   output$phenoSentence <- renderUI(req(try(phenoStats()$SENTENCE)))
   
-  # PGS Data 
+  # PGS Stratification and Quick Overview Data 
   pgsStats <- reactive({getPGSStratStats(x=input$pheno_selector,
                                          y=input$pgs_selector)})
   
   #output$pgsStratSummary <- DT::renderDataTable(req(try(pgsStats()$TABLE))) #[!] Try regular table for now
-  output$pgsStratSummary <- renderTable(req(try(pgsStats()$TABLE)))
+  output$pgsStratSummary <- renderTable(req(try(pgsStats()$TABLE)),
+                                        digits = 4,
+                                        bordered = TRUE)
   output$pgsSentence <- renderUI(req(try(pgsStats()$SENTENCE)))
   output$pgsStratPlot <- renderPlot(req(try(pgsStats()$PLOT)))
+  output$pgsChromDistSentence <- renderUI(req(try(pgsStats()$CHROM_DIST_SENTENCE)))
+  output$pgsStratSentence <- renderUI(req(try(pgsStats()$PGS_STRAT_SENTENCE)))
   
+  # PGS Perturb-Fixed Architecture Data
+  pgsPerturbFixed <- reactive({getPGSStats1(x=input$pheno_selector,
+                                  y=input$pgs_selector,
+                                  z=input$pgs_cutoff_selector)})
   # Gene Expression metadata [!]
   output$geneExpressionPlot <- renderPlot(req(try(summarizeGeneExp(chr=input$table_selector, 
                                                                    input.gene.name=input$gene_selector)[['PLOT']])))

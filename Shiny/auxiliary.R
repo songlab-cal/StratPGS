@@ -173,48 +173,96 @@ getPGSStratStats <- function(x, y) {
     pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-5_no_dups.txt"))
     pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-5_gPC_metrics.csv")) %>%
       subset(PHENO==pheno_name)
-  } else {
+  } else if (y == "Clumping and thresholding (stringent)") {
     pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-8_no_dups.txt"))
     pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-8_gPC_metrics.csv")) %>%
       subset(PHENO==pheno_name)
+  } else {
+    pgs_df <- NULL
+    pgs_strat_df <- NULL
   }
-  chrom_tab <- table(pgs_df$chrom)
-  pie_chart_df <- data.frame(Chromosome=sapply(names(chrom_tab),removeLeadingZero),
-                             Count=as.numeric(chrom_tab),
-                             row.names=NULL)  
   
-  # collate objects to return
-  df_to_return <- data.frame(Unsigned_PC1_CosSim=pgs_strat_df$PC1_ABS_COSSIM,
-                             Unsigned_PC1_Pearson=pgs_strat_df$PC1_ABS_PEARSON,
-                             Unsigned_PC1_Spearman=pgs_strat_df$PC1_ABS_SPEARMAN,
-                             Entropy_CosSim=pgs_strat_df$EVENNESS_COSSIM,
-                             Entropy_Pearson=pgs_strat_df$EVENNESS_PEARSON,
-                             Entropy_Spearman=pgs_strat_df$EVENNESS_SPEARMAN,
-                             Rank_PC1_CosSim=pgs_strat_df$PC1_COSSIM_ABS_RANK,
-                             Rank_PC1_Pearson=pgs_strat_df$PC1_PEARSON_ABS_RANK,
-                             Rank_PC1_Spearman=pgs_strat_df$PC1_SPEARMAN_ABS_RANK,
-                             LM_R2=pgs_strat_df$R2_PHENO_PCS,
-                             LM_Adj_R2=pgs_strat_df$ADJ_R2_PHENO_PCS,
-                             LM_No_Sig_Vars=pgs_strat_df$LinearModel_NUM_SIG_VARS)
-  plot_to_return <- ggplot(pie_chart_df, aes(x="", y=Count, fill=Chromosome)) +
-    geom_col(width = 1, color = 1) +
-    geom_bar(stat="identity", width=1) +
-    coord_polar("y", start=0) +
-    theme_void() 
+  if (!is.null(pgs_df)) {
+    chrom_tab <- table(pgs_df$chrom)
+    pie_chart_df <- data.frame(Chromosome=sapply(names(chrom_tab),removeLeadingZero),
+                               Count=as.numeric(chrom_tab),
+                               row.names=NULL)  
+    
+    # collate objects to return
+    df_to_return <- data.frame(`Unsigned Metric` = c("PC1 Cosine Similarity",
+                                                     "PC1 Pearson r",
+                                                     "PC1 Spearman \u03C1"),
+                               `Value` = c(pgs_strat_df$PC1_ABS_COSSIM,
+                                           pgs_strat_df$PC1_ABS_PEARSON,
+                                           pgs_strat_df$PC1_ABS_SPEARMAN),
+                               `Evenness Metric` = c("Cosine Similarity",
+                                                     "Pearson r",
+                                                     "Spearman \u03C1"),
+                               `Value` = c(pgs_strat_df$EVENNESS_COSSIM,
+                                           pgs_strat_df$EVENNESS_PEARSON,
+                                           pgs_strat_df$EVENNESS_SPEARMAN),
+                               `Linear Model Metric` = c("R\u00B2",
+                                                         "Adjusted R\u00B2",
+                                                         "No. Significant Features"),
+                               `Value` = c(format(pgs_strat_df$R2_PHENO_PCS,scientific=TRUE),
+                                           format(pgs_strat_df$ADJ_R2_PHENO_PCS,scientific=TRUE),
+                                           pgs_strat_df$LinearModel_NUM_SIG_VARS),
+                               check.names=FALSE)
+    # plot_to_return <- ggplot(pie_chart_df, aes(x="", y=Count, fill=Chromosome)) +
+    #   geom_col(width = 1, color = 1) +
+    #   geom_bar(stat="identity", width=1) +
+    #   coord_polar("y", start=0) +
+    #   theme_void() 
+    plot_to_return <- ggplot(pie_chart_df, aes(x=Chromosome, y=Count, fill=Chromosome)) +
+      geom_bar(stat="identity", width=1,colour="#636363") +
+      theme_bw() +
+      theme(legend.position="none")
+  } else {
+    df_to_return <-NULL
+    plot_to_return<-NULL
+  }
   
   # return
-  return(list(SENTENCE=paste0('There are ', nrow(pgs_df), ' variants in ',y,'.'),
+  return(list(SENTENCE=ifelse(is.null(pgs_df),"",paste0('There are ', nrow(pgs_df), ' variants in ',y,'.')),
               TABLE=df_to_return,
-              PLOT=plot_to_return))
+              PLOT=plot_to_return,
+              CHROM_DIST_SENTENCE=ifelse(is.null(pgs_df),"","1. Variant Distribution"),
+              PGS_STRAT_SENTENCE=ifelse(is.null(pgs_df),"","2. PC Stratification")))
 }
 
-#' Get PGS summary statistics
-#' x = PGS method
-#' y = cutoff
-getPGSStats <- function(x, y) {
+#' Get PGS summary statistics 1 -- perturbed-fixed architecture
+#' x = phenotype
+#' y = PGS type
+#' z = cutoff
+getPGSStats1 <- function(x, y, z) {
   # sensitivity metrics (matched to performance metrics)
   # fixed-perturbed architecture
-  message(date(), ': Generating ', x,' sensitivity statistics using cutoff = ', y,'...')
+  message(date(), ': Generating ', y,' perturbed-fixed architecture using cutoff = ', z,'...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  pheno_name <- relevant_row[['pheno_name']]
+  if (y == "Clumping and thresholding (lenient)") {
+    perturb_fix_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-5_no_dups.txt"))
+    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-5_gPC_metrics.csv")) %>%
+      subset(PHENO==pheno_name)
+  } else if (y == "Clumping and thresholding (stringent)") {
+    pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-8_no_dups.txt"))
+    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-8_gPC_metrics.csv")) %>%
+      subset(PHENO==pheno_name)
+  } else {
+    pgs_df <- NULL
+    pgs_strat_df <- NULL
+  }
+  
+  return(list(PERTURB_FIX_SENTENCE=ifelse(is.null(pgs_df),"","3. Perturbed-Fixed Architecture"),
+              SENSITIVITY_SENTENCE=ifelse(is.null(pgs_df),"","4. Performance and Sensitivity")))
+}
+
+#' Get PGS summary statistics 2 -- specific performance metric and sensitivity
+#' x = PGS method
+#' y = cutoff
+#' z = metric
+getPGSStats2 <- function(x,y,z) {
+  
 }
 
 # x <- covar.ids[1]
