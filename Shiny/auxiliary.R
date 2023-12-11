@@ -7,6 +7,15 @@ phenos_corrs <- readr::read_csv('phenos_corrs.csv')
 phenos_cossim <- readr::read_csv('phenos_cossim.csv')
 phenos_random_stats <- readr::read_csv('phenos_randomization_stats.csv')
 ukbb_table <- readr::read_csv('ukbb_table.csv')
+
+removeLeadingZero <- function(inputString) {
+  if (substr(inputString, 1, 1) == "0") {
+    return(substr(inputString, 2, nchar(inputString)))
+  } else {
+    return(inputString)
+  }
+}
+
 getCorrPlot <- function(x) {
   #covar.plot.list <- readRDS(file=paste0('plots/',x,'_plots.rds'))
   message(date(), ': Generating corrplot for ', x, '...')
@@ -150,22 +159,62 @@ summarizePheno <- function(name) {
 }
 
 #' Get PGS stratification summary statistics
-#' x = PGS method
-#' 
-getPGSStratStats <- function(x) {
-  # no. variants in PGS
+#' x = phenotype
+#' y = PGS type
+getPGSStratStats <- function(x, y) {
+  # no. variants in PGS (summarize from directory of PGS files)
   # distribution across autosomes
   # PC-related stratification metrics x 11
   # performance metrics 
+  message(date(), ': Generating ', y,' stratification statistics for ', x,'...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  pheno_name <- relevant_row[['pheno_name']]
+  if (y == "Clumping and thresholding (lenient)") {
+    pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-5_no_dups.txt"))
+    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-5_gPC_metrics.csv")) %>%
+      subset(PHENO==pheno_name)
+  } else {
+    pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-8_no_dups.txt"))
+    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-8_gPC_metrics.csv")) %>%
+      subset(PHENO==pheno_name)
+  }
+  chrom_tab <- table(pgs_df$chrom)
+  pie_chart_df <- data.frame(Chromosome=sapply(names(chrom_tab),removeLeadingZero),
+                             Count=as.numeric(chrom_tab),
+                             row.names=NULL)  
   
+  # collate objects to return
+  df_to_return <- data.frame(Unsigned_PC1_CosSim=pgs_strat_df$PC1_ABS_COSSIM,
+                             Unsigned_PC1_Pearson=pgs_strat_df$PC1_ABS_PEARSON,
+                             Unsigned_PC1_Spearman=pgs_strat_df$PC1_ABS_SPEARMAN,
+                             Entropy_CosSim=pgs_strat_df$EVENNESS_COSSIM,
+                             Entropy_Pearson=pgs_strat_df$EVENNESS_PEARSON,
+                             Entropy_Spearman=pgs_strat_df$EVENNESS_SPEARMAN,
+                             Rank_PC1_CosSim=pgs_strat_df$PC1_COSSIM_ABS_RANK,
+                             Rank_PC1_Pearson=pgs_strat_df$PC1_PEARSON_ABS_RANK,
+                             Rank_PC1_Spearman=pgs_strat_df$PC1_SPEARMAN_ABS_RANK,
+                             LM_R2=pgs_strat_df$R2_PHENO_PCS,
+                             LM_Adj_R2=pgs_strat_df$ADJ_R2_PHENO_PCS,
+                             LM_No_Sig_Vars=pgs_strat_df$LinearModel_NUM_SIG_VARS)
+  plot_to_return <- ggplot(pie_chart_df, aes(x="", y=Count, fill=Chromosome)) +
+    geom_col(width = 1, color = 1) +
+    geom_bar(stat="identity", width=1) +
+    coord_polar("y", start=0) +
+    theme_void() 
+  
+  # return
+  return(list(SENTENCE=paste0('There are ', nrow(pgs_df), ' variants in ',y,'.'),
+              TABLE=df_to_return,
+              PLOT=plot_to_return))
 }
 
 #' Get PGS summary statistics
 #' x = PGS method
 #' y = cutoff
-getPGSStats <- function(x) {
+getPGSStats <- function(x, y) {
   # sensitivity metrics (matched to performance metrics)
   # fixed-perturbed architecture
+  message(date(), ': Generating ', x,' sensitivity statistics using cutoff = ', y,'...')
 }
 
 # x <- covar.ids[1]

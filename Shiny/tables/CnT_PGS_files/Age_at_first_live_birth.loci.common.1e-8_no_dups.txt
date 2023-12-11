@@ -1,0 +1,2 @@
+chrom,pos,major,minor,beta,p_value,gwas_p_value
+3,49916044,G,A,0.0269252173903808,9.85433893145436e-31,4.92150594111003e-12

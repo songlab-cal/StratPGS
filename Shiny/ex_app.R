@@ -122,8 +122,16 @@ ui <- fluidPage(
         tabPanel("PGS Stratification",
                  p(""),
                  p(uiOutput("PGSmsg")),
-                 
-                 ),
+                 h4("1. Quick Overview"),
+                 p(uiOutput("pgsSentence")),
+                 plotOutput(outputId = "pgsStratPlot"),
+                 h4("2. Stratification Statistics"),
+                 tableOutput("pgsStratSummary") # [!] To do: Fix the table (do a 3 x 4?)
+                 # [!] Possibility: combine the table and the plot in one row
+                 # [!]              add second row that allows selection of performance metric 
+                 #                  (view plot and sensitivity)
+                 #DT::dataTableOutput("pgsStratSummary")
+        ),
         # Panel: Exogenous Covariates (age, sex, etc.)
         tabPanel("Exogenous Covariates (Beta)",
                  # Let user choose Covariate
@@ -300,7 +308,13 @@ server <- function(input, output, session) {
   output$phenoSentence <- renderUI(req(try(phenoStats()$SENTENCE)))
   
   # PGS Data 
-  pgsStats <- reactive({getPGSStats})
+  pgsStats <- reactive({getPGSStratStats(x=input$pheno_selector,
+                                         y=input$pgs_selector)})
+  
+  #output$pgsStratSummary <- DT::renderDataTable(req(try(pgsStats()$TABLE))) #[!] Try regular table for now
+  output$pgsStratSummary <- renderTable(req(try(pgsStats()$TABLE)))
+  output$pgsSentence <- renderUI(req(try(pgsStats()$SENTENCE)))
+  output$pgsStratPlot <- renderPlot(req(try(pgsStats()$PLOT)))
   
   # Gene Expression metadata [!]
   output$geneExpressionPlot <- renderPlot(req(try(summarizeGeneExp(chr=input$table_selector, 
