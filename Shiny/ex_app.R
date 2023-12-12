@@ -368,17 +368,17 @@ server <- function(input, output, session) {
   output$phenoSentence <- renderUI(req(try(phenoStats()$SENTENCE)))
   
   # PGS Stratification and Quick Overview Data 
-  pgsStats <- reactive({getPGSStratStats(x=input$pheno_selector,
+  pgsStratStats <- reactive({getPGSStratStats(x=input$pheno_selector,
                                          y=input$pgs_selector)})
   
-  #output$pgsStratSummary <- DT::renderDataTable(req(try(pgsStats()$TABLE))) #[!] Try regular table for now
-  output$pgsStratSummary <- renderTable(req(try(pgsStats()$TABLE)),
+  #output$pgsStratSummary <- DT::renderDataTable(req(try(pgsStratStats()$TABLE))) #[!] Try regular table for now
+  output$pgsStratSummary <- renderTable(req(try(pgsStratStats()$TABLE)),
                                         digits = 4,
                                         bordered = TRUE)
-  output$pgsSentence <- renderUI(req(try(pgsStats()$SENTENCE)))
-  output$pgsStratPlot <- renderPlot(req(try(pgsStats()$PLOT)))
-  output$pgsChromDistSentence <- renderUI(req(try(pgsStats()$CHROM_DIST_SENTENCE)))
-  output$pgsStratSentence <- renderUI(req(try(pgsStats()$PGS_STRAT_SENTENCE)))
+  output$pgsSentence <- renderUI(req(try(pgsStratStats()$SENTENCE)))
+  output$pgsStratPlot <- renderPlot(req(try(pgsStratStats()$PLOT)))
+  output$pgsChromDistSentence <- renderUI(req(try(pgsStratStats()$CHROM_DIST_SENTENCE)))
+  output$pgsStratSentence <- renderUI(req(try(pgsStratStats()$PGS_STRAT_SENTENCE)))
   
   # PGS Perturb-Fixed Architecture Data
   pgsPerturbFixed <- reactive({getPGSStats1(x=input$pheno_selector,

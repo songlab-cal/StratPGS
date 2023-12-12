@@ -241,19 +241,50 @@ getPGSStats1 <- function(x, y, z) {
   relevant_row <- ukbb_table %>% subset(english_name==x)
   pheno_name <- relevant_row[['pheno_name']]
   if (y == "Clumping and thresholding (lenient)") {
-    perturb_fix_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-5_no_dups.txt"))
-    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-5_gPC_metrics.csv")) %>%
-      subset(PHENO==pheno_name)
+    perturb_fix_df <- readr::read_csv(paste0(
+      "tables/perturb-fixed-architecture/gwas1e-5_cutoff",z,".csv")) %>%
+      subset(PHENOTYPE==x)
   } else if (y == "Clumping and thresholding (stringent)") {
-    pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-8_no_dups.txt"))
-    pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-8_gPC_metrics.csv")) %>%
-      subset(PHENO==pheno_name)
+    perturb_fix_df <- readr::read_csv(paste0(
+      "tables/perturb-fixed-architecture/gwas1e-8_cutoff",z,".csv")) %>%
+      subset(PHENOTYPE==x)
   } else {
-    pgs_df <- NULL
-    pgs_strat_df <- NULL
+    perturb_fix_df <- NULL
   }
   
-  return(list(PERTURB_FIX_SENTENCE=ifelse(is.null(pgs_df),"","3. Perturbed-Fixed Architecture"),
+  df_to_return <- data.frame(`Fixed Variant Quantity` = c("Maximum |\u03B2\u2C7C|",
+                                                          "Median |\u03B2\u2C7C|",
+                                                          "Mean |\u03B2\u2C7C|",
+                                                          "Sum of |\u03B2\u2C7C|",
+                                                          "Variance of \u03B2\u2C7C"),
+                             `Value` = c(perturb_fix_df$MAX_MAG_BKGRD,
+                                         perturb_fix_df$MEDIAN_MAG_BKGRD,
+                                         perturb_fix_df$AVE_MAG_BKGRD,
+                                         perturb_fix_df$SUM_BKGRD,
+                                         perturb_fix_df$VAR_BKGRD),
+                             `Perturbed Variant Quantity` = c("Maximum |\u03B2\u2C7C|",
+                                                              "Median |\u03B2\u2C7C|",
+                                                              "Mean |\u03B2\u2C7C|",
+                                                              "Sum of |\u03B2\u2C7C|",
+                                                              "Variance of \u03B2\u2C7C"),
+                             `Value` = c(perturb_fix_df$MAX_MAG_TARGET,
+                                         perturb_fix_df$MEDIAN_MAG_TARGET,
+                                         perturb_fix_df$AVE_MAG_TARGET,
+                                         perturb_fix_df$SUM_TARGET,
+                                         perturb_fix_df$VAR_TARGET),
+                             `Perturbed vs Fixed` = c("Wilcoxon(Perturbed |\u03B2\u2C7C|,Fixed |\u03B2\u2C7C|) p-value",
+                                                      "Sum(Perturbed |\u03B2\u2C7C|)/Sum(Fixed |\u03B2\u2C7C|)",
+                                                      "","",""),
+                             `Value` = c(perturb_fix_df$BETA_WILCOX_PVAL,
+                                         perturb_fix_df$SUM_RATIO_TARGET_BKGRD,
+                                         NULL,NULL,NULL)) 
+  
+  return(list(SENTENCE=ifelse(is.null(perturb_fix_df),"",paste0('There are ', 
+                                                                perturb_fix_df$N_TARGET_SNPS, 
+                                                                ' variants with GWAS p-value at least ',
+                                                                z, '.')),
+              TABLE=df_to_return,
+              PERTURB_FIX_SENTENCE=ifelse(is.null(pgs_df),"","3. Perturbed-Fixed Architecture"),
               SENSITIVITY_SENTENCE=ifelse(is.null(pgs_df),"","4. Performance and Sensitivity")))
 }
 
