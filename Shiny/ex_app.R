@@ -146,7 +146,10 @@ ui <- fluidPage(
                  ),
                  h3("Performance Sensitivity and Polygenic Architecture"),
                  p(uiOutput("ifnoPGS")),
-                 uiOutput("PGScutoffselect")
+                 uiOutput("PGScutoffselect"),
+                 h4(uiOutput("pgsPerturbFixedHeader")),
+                 uiOutput("pgsPerturbFixedSentence"),
+                 tableOutput("pgsPerturbFixedSummary")
                  # selectInput(inputId = "pgs_cutoff_selector",
                  #             label = "",
                  #             choices = c(1e-6,1e-7,1e-8))
@@ -384,6 +387,11 @@ server <- function(input, output, session) {
   pgsPerturbFixed <- reactive({getPGSStats1(x=input$pheno_selector,
                                   y=input$pgs_selector,
                                   z=input$pgs_cutoff_selector)})
+  output$pgsPerturbFixedSentence <- renderUI(req(try(pgsPerturbFixed()$SENTENCE)))
+  output$pgsPerturbFixedSummary <- renderTable(req(try(pgsPerturbFixed()$TABLE)),
+                                            digits=4,bordered=TRUE)
+  output$pgsPerturbFixedHeader <- renderUI(req(try(pgsPerturbFixed()$PERTURB_FIX_HEADER)))
+  
   # Gene Expression metadata [!]
   output$geneExpressionPlot <- renderPlot(req(try(summarizeGeneExp(chr=input$table_selector, 
                                                                    input.gene.name=input$gene_selector)[['PLOT']])))

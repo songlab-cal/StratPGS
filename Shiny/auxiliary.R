@@ -243,15 +243,16 @@ getPGSStats1 <- function(x, y, z) {
   if (y == "Clumping and thresholding (lenient)") {
     perturb_fix_df <- readr::read_csv(paste0(
       "tables/perturb-fixed-architecture/gwas1e-5_cutoff",z,".csv")) %>%
-      subset(PHENOTYPE==x)
+      subset(PHENOTYPE==pheno_name)
   } else if (y == "Clumping and thresholding (stringent)") {
     perturb_fix_df <- readr::read_csv(paste0(
       "tables/perturb-fixed-architecture/gwas1e-8_cutoff",z,".csv")) %>%
-      subset(PHENOTYPE==x)
+      subset(PHENOTYPE==pheno_name)
   } else {
     perturb_fix_df <- NULL
   }
   
+  #print(perturb_fix_df)
   df_to_return <- data.frame(`Fixed Variant Quantity` = c("Maximum |\u03B2\u2C7C|",
                                                           "Median |\u03B2\u2C7C|",
                                                           "Mean |\u03B2\u2C7C|",
@@ -275,17 +276,17 @@ getPGSStats1 <- function(x, y, z) {
                              `Perturbed vs Fixed` = c("Wilcoxon(Perturbed |\u03B2\u2C7C|,Fixed |\u03B2\u2C7C|) p-value",
                                                       "Sum(Perturbed |\u03B2\u2C7C|)/Sum(Fixed |\u03B2\u2C7C|)",
                                                       "","",""),
-                             `Value` = c(perturb_fix_df$BETA_WILCOX_PVAL,
+                             `Value` = c(format(perturb_fix_df$BETA_WILCOX_PVAL,scientific=TRUE),
                                          perturb_fix_df$SUM_RATIO_TARGET_BKGRD,
-                                         NULL,NULL,NULL)) 
+                                         NA,NA,NA),
+                             check.names=FALSE) 
   
   return(list(SENTENCE=ifelse(is.null(perturb_fix_df),"",paste0('There are ', 
                                                                 perturb_fix_df$N_TARGET_SNPS, 
                                                                 ' variants with GWAS p-value at least ',
-                                                                z, '.')),
+                                                                z, '. These variants are Perturbed, while the remaining are Fixed.')),
               TABLE=df_to_return,
-              PERTURB_FIX_SENTENCE=ifelse(is.null(pgs_df),"","3. Perturbed-Fixed Architecture"),
-              SENSITIVITY_SENTENCE=ifelse(is.null(pgs_df),"","4. Performance and Sensitivity")))
+              PERTURB_FIX_HEADER=ifelse(is.null(perturb_fix_df),"","3. Perturbed-Fixed Architecture")))
 }
 
 #' Get PGS summary statistics 2 -- specific performance metric and sensitivity
