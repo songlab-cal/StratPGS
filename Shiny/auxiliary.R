@@ -175,6 +175,7 @@ summarizePheno <- function(name) {
   message(date(), ': Generating summary list for ', name, '...')
   target_row <- ukbb_table %>% subset(english_name==name)
   return(list(No_Avail_PGS=target_row$no_avail_pgs,
+              Zero_PGS_Sentence=paste0("No PGS data for ", name,"."),
               Category=target_row$category,
               Field=target_row$ukbb_field,
               URL=paste0("https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=",target_row$ukbb_field)))
@@ -191,7 +192,10 @@ getPGSStratStats <- function(x, y) {
   message(date(), ': Generating ', y,' stratification statistics for ', x,'...')
   relevant_row <- ukbb_table %>% subset(english_name==x)
   pheno_name <- relevant_row[['pheno_name']]
-  if (y == "Clumping and thresholding (lenient)") {
+  if (is.null(y)) {
+    pgs_df <- NULL
+    pgs_strat_df <- NULL
+  } else if (y == "Clumping and thresholding (lenient)") {
     pgs_df <- readr::read_delim(paste0("tables/CnT_PGS_files/",pheno_name,".loci.common.1e-5_no_dups.txt"))
     pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-5_gPC_metrics.csv")) %>%
       subset(PHENO==pheno_name)
@@ -200,8 +204,7 @@ getPGSStratStats <- function(x, y) {
     pgs_strat_df <- readr::read_csv(paste0("tables/train_n288728_prs_gwas_1e-8_gPC_metrics.csv")) %>%
       subset(PHENO==pheno_name)
   } else {
-    pgs_df <- NULL
-    pgs_strat_df <- NULL
+    stop("y must be NULL or Clumping and thresholding.")
   }
   
   if (!is.null(pgs_df)) {
@@ -251,10 +254,13 @@ getPGSStratStats <- function(x, y) {
   }
   
   # return
-  return(list(SENTENCE=ifelse(is.null(pgs_df),"",paste0('There are ', nrow(pgs_df), ' variants in ',y,'.')),
+  return(list(SENTENCE=ifelse(is.null(pgs_df),
+                              "",
+                              paste0('There are ', nrow(pgs_df), 
+                                     ' variants in ',y,' PGS for ', x,'.')),
               TABLE=df_to_return,
               PLOT=plot_to_return,
-              CHROM_DIST_SENTENCE=ifelse(is.null(pgs_df),"","1. Variant Distribution"),
+              CHROM_DIST_SENTENCE=ifelse(is.null(pgs_df),"","1. Variant Distribution by Chromosome"),
               PGS_STRAT_SENTENCE=ifelse(is.null(pgs_df),"","2. PC Stratification")))
 }
 
@@ -268,6 +274,7 @@ getPGSStats1 <- function(x, y, z) {
   message(date(), ': Generating ', y,' perturbed-fixed architecture using cutoff = ', z,'...')
   relevant_row <- ukbb_table %>% subset(english_name==x)
   pheno_name <- relevant_row[['pheno_name']]
+
   if (y == "Clumping and thresholding (lenient)") {
     perturb_fix_df <- readr::read_csv(paste0(
       "tables/perturb-fixed-architecture/gwas1e-5_cutoff",z,".csv")) %>%

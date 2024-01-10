@@ -1,4 +1,4 @@
-### Libraries -----------------------------------------------------------
+### Libraries ------------------------------------------------------------------
 library(shiny)
 library(shinythemes)
 library(shinyjs) 
@@ -8,7 +8,7 @@ library(scales) #[!]
 library(dplyr)
 library(ggplot2)
 
-### Read core script and create global variables ------------------------
+### Read core script and create global variables -------------------------------
 source('auxiliary.R')
 
 phenos <- readr::read_csv("ukbb_table.csv")[["english_name"]]
@@ -38,7 +38,7 @@ metric_names_df <- data.frame(english_name=c("Pearson r",
                                          "PERCENTILE_AVE_PHENO_SLOPE",
                                          "PERCENTILE_AVE_PHENO_SPEARMAN"))
 
-### Define UI -------------------------------------------------------------
+### Define UI ------------------------------------------------------------------
 about_page <- tabPanel(
   title = "Home",
   setBackgroundColor(
@@ -64,7 +64,6 @@ about_page <- tabPanel(
                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
                  actionButton("learn_more", "Learn More", icon("circle-info"), 
                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
-                 #actionButton("Search_by_phenotype", "Search by Indication",class="btn btn-info"),
                  br(),
                  br()),
                br(), width=8,align="center"),
@@ -141,8 +140,30 @@ Phenotype_page <- tabPanel(
                           column(6,h4("2. Pearson Correlation Profile"),
                                  plotOutput(outputId = "phenoCorrPlot"))
                           ),
-                 p("The profiles show the distribution of correlation and similarity measures of the phenotype and genetic PCs (gPCs).")),
-        tabPanel("Other Statistics")
+                 tags$li("The profiles above show the distribution of correlation and similarity measures of the phenotype and genetic PCs (gPCs)."),
+                 tags$li("For example, the bar above gPC_1 depicts the Pearson correlation and cosine similarity between the phenotype and gPC1."),
+                 tags$li("The gPC with the largest magnitude is coloured red.")),
+        tabPanel("Other Statistics",
+                 h4("Stratification Profile Summary and Prediction Inflation"),
+                 column(12, align="center", 
+                        tableOutput("phenoSummary"),
+                        ),
+                 actionButton("PhenoStratShowBtn", "Show Details"), # [TESTING]
+                 actionButton("PhenoStratHideBtn", "Hide Details"), # [TESTING]
+                 shinyjs::hidden(shiny::tags$ul(id = "pheno_strat_details",
+                                       shiny::tags$li(p(shiny::tags$b("Cosine Similarity Evenness"), 
+                                                        "computes the Shannon entropy of the 40 unsigned and normalized cosine similarities. Namely, if $(x_1,\\ldots,x_{40})$ denote the cosine similarities with the 40 gPCs as shown in the Stratification Profile tab, then let $y_i=|x_i|/(|x_1|+\\ldots+|x_{40}|)$ be the unsigned and normalized cosine similarity with the $i$th gPC, so that $y_1+\\ldots+y_{40}=1$. The Shannon entropy is $\\sum_{i=1}^{40}y_i\\log (1/y_i)$, which captures the evenness of the distribution of cosine similarities. Larger values imply greater evenness (Max $=\\log(40)\\approx 3.69$; Min = $0$).")), 
+                                       shiny::tags$li(p("Similarly,",
+                                                        shiny::tags$b("Pearson r Evenness"),
+                                                        "computes the Shannon entropy of the 40 unsigned and normalized Pearson correlations. Larger values imply greater evenness (Max $=\\log(40)\\approx 3.69$; Min = $0$).")),
+                                       shiny::tags$li(p(shiny::tags$b("Mean Incremental R\u00B2"), 
+                                                        "reports the average incremental R\u00B2, across 200 random polygenic scores (rPGSs) constructed by arbitrarily choosing 10% of all autosomal variants and independently assigning standard Gaussian effects to them (i.e., $\\beta_j\\sim N(0,1)$ for variant $j$ chosen). For each rPGS, R\u00B2 was computed on a linear model including the rPGS, alongside age, sex and the top 20 gPCs. This is subtracted by the baseline model including just the latter covariates, to obtain the Incremental R\u00B2.")),
+                                       shiny::tags$li(p(shiny::tags$b("Incremental R\u00B2 p-value "), 
+                                                        "reports the significance of the Mean Incremental R\u00B2 described previously. Significance is obtained by permuting the phenotypes randomly across the individuals, and repeating the same procedure of computing average incremental R\u00B2, for 100 times. The empirical p-value reports the fraction of permuted Mean Incremental R\u00B2's that beat the observed ($(\\#\\text{beat} + 1)/101$). A smaller p-value indicates greater significance of the observed Mean Incremental R\u00B2.")) 
+                                       
+                                       
+                 ))
+                 )
       )                                    
     )),
 )
@@ -150,11 +171,27 @@ Phenotype_page <- tabPanel(
 PGS_page <- tabPanel(
   
   title='PGS', value="PGS",
-  titlePanel("PGS Stratification")
+  titlePanel("PGS Stratification"),
+  tabsetPanel(
+    tabPanel("Quick Overview",
+             p(uiOutput("pgsSentence")),
+             p(uiOutput("PGSmsg")),
+             p(HTML("To select another phenotype, go back to <b>Phenotype</b> tab.")),
+             fluidRow(
+               column(5,
+                      h4(uiOutput("pgsChromDistSentence")),
+                      plotOutput(outputId = "pgsStratPlot")),
+               column(7,h4(uiOutput("pgsStratSentence")),
+                      tableOutput("pgsStratSummary"))
+             )),
+    tabPanel("Polygenic Architecture and Performance Sensitivity",
+             p(uiOutput("ifnoPGS")))
+  )
 )
 
 ui <- fluidPage(
   withMathJax(),
+  shinyjs::useShinyjs(),
   tags$div(HTML("<script type='text/x-mathjax-config'>
                 MathJax.Hub.Config({
                 tex2jax: {inlineMath: [['$','$']]}
@@ -167,7 +204,8 @@ ui <- fluidPage(
       div(
         div(
           img(src="dna_pca_3.png",
-              height = "45px",width = "45px",style = "position: relative; margin:-20px -20px; display:right-align;")),''),
+              height = "45px",width = "45px",
+              style = "position: relative; margin:-20px -20px; display:right-align;")),''),
     position = 'fixed-top',
     windowTitle="Principal Components and Effect Randomness",
     header=tags$style(type="text/css", "body {padding-top: 70px;},
@@ -191,8 +229,8 @@ server <- function(input, output,session) {
     updateTabsetPanel(session, "tabset", selected = "About")
   })
   
-  ## Phenotype Tab
-  # Quick Information about Phenotype --------------------------------------------
+  ############## Phenotype Tab ##############
+  # Quick Information about Phenotype ------------------------------------------
   summarizedPheno <- reactive({
     req(input$pheno_selector)
     summarizePheno(name=input$pheno_selector)
@@ -206,7 +244,12 @@ server <- function(input, output,session) {
     HTML(paste(line_1, line_2, sep = '<br/>'))
   })
   
-  # Quick Information about PGSs associated with Phenotype ------------------------
+  # URL to UKBB Data Portal
+  output$UKBB_Reference <- renderUI(a(href=summarizedPheno()[["URL"]], 
+                                      "Reference", 
+                                      target="_blank"))
+  
+  # Quick Information about PGSs associated with Phenotype ---------------------
   # This enables selection of PGS matched to a selected phenotype
   observeEvent(input$pheno_selector, {
     message("Table event observed -- phenotype selected")
@@ -246,13 +289,13 @@ server <- function(input, output,session) {
     } else {
       fluidRow(
         column(12,selectInput(inputId = "pgs_selector", 
-                             label = "", 
+                             label = "",
                              choices = ""))
       )
     }
   })
   
-  # Phenotype stratification profile ------------------------------------------
+  # Phenotype stratification profile -------------------------------------------
   output$phenoCossimPlot <- renderPlot(req(try(plot(getPhenoCossimPlot(x=input$pheno_selector,
                                                                        y=input$pheno_version_selector) + 
                                                       theme(text=element_text(family='DejaVu Sans'))
@@ -260,6 +303,54 @@ server <- function(input, output,session) {
   output$phenoCorrPlot <- renderPlot(req(try(plot(getPhenoCorrPlot(x=input$pheno_selector,
                                                                    y=input$pheno_version_selector) + 
                                                     theme(text=element_text(family='DejaVu Sans'))))))
+  
+  # Phenotype stratification and rPGS statistics -------------------------------
+  phenoStats <- reactive({getPhenoStats(x=input$pheno_selector,
+                                        y=input$pheno_version_selector)})
+  output$phenoSummary <- renderTable(req(try(phenoStats()$TABLE)), 
+                                     digits = 4,
+                                     striped = TRUE,
+                                     bordered = TRUE)
+  output$phenoSentence <- renderUI(req(try(phenoStats()$SENTENCE)))
+  
+  # Enable hiding and showing of phenotype stratification statistics details
+  observeEvent(input$PhenoStratShowBtn,
+               {show("pheno_strat_details",asis=TRUE)})
+  observeEvent(input$PhenoStratHideBtn,
+               {hide("pheno_strat_details",asis=TRUE)})
+  
+  ############## PGS Tab ##############
+  # PGS stratification profile and chromosome plot -----------------------------
+  output$PGSmsg <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      HTML(summarizedPheno()[["Zero_PGS_Sentence"]])
+    } else {
+      HTML("We analyze population stratification of the PGS on its training cohort of 288,728 individuals of European descent.")
+    }
+  })
+  # PGS Stratification and Quick Overview Data 
+  pgsStratStats <- reactive({getPGSStratStats(x=input$pheno_selector,
+                                              y=input$pgs_selector)})
+  
+  output$pgsStratSummary <- renderTable(req(try(pgsStratStats()$TABLE)),
+                                        digits = 4,
+                                        hover = TRUE,
+                                        bordered = TRUE)
+  output$pgsSentence <- renderUI(req(try(pgsStratStats()$SENTENCE)))
+  output$pgsStratPlot <- renderPlot(req(try(pgsStratStats()$PLOT)))
+  output$pgsChromDistSentence <- renderUI(req(try(pgsStratStats()$CHROM_DIST_SENTENCE)))
+  output$pgsStratSentence <- renderUI(req(try(pgsStratStats()$PGS_STRAT_SENTENCE)))
+  
+  # PGS polygenic architecture and performance sensitivity
+  output$ifnoPGS <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      HTML(summarizedPheno()[["Zero_PGS_Sentence"]])
+    } else {
+      HTML("We analyze the perturbed-fixed architecture of the PGS, and the PGS sensitivity on a held-out test cohort of 68,931 individuals of European descent.")
+    }
+  })
   
   ## Gene Page
   
