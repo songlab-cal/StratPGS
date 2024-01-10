@@ -185,7 +185,10 @@ PGS_page <- tabPanel(
                       tableOutput("pgsStratSummary"))
              )),
     tabPanel("Polygenic Architecture and Performance Sensitivity",
-             p(uiOutput("ifnoPGS")))
+             h4(uiOutput("nonSigHeader")),
+             p(uiOutput("ifnoPGS")),
+             uiOutput("PGScutoffselect")
+             )
   )
 )
 
@@ -342,13 +345,45 @@ server <- function(input, output,session) {
   output$pgsChromDistSentence <- renderUI(req(try(pgsStratStats()$CHROM_DIST_SENTENCE)))
   output$pgsStratSentence <- renderUI(req(try(pgsStratStats()$PGS_STRAT_SENTENCE)))
   
-  # PGS polygenic architecture and performance sensitivity
+  # PGS polygenic architecture and performance sensitivity ---------------------
+  output$nonSigHeader <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
+    if (no_avail_pgs==0) {
+      HTML("")
+    } else {
+      HTML("Assignment of Non-significant Variants")
+    }
+  })
+  
   output$ifnoPGS <- renderUI({
     no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]]
     if (no_avail_pgs==0) {
       HTML(summarizedPheno()[["Zero_PGS_Sentence"]])
     } else {
       HTML("We analyze the perturbed-fixed architecture of the PGS, and the PGS sensitivity on a held-out test cohort of 68,931 individuals of European descent.")
+    }
+  })
+  
+  # PGS cutoff selector
+  output$PGScutoffselect <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]] 
+    if (no_avail_pgs==0) {
+      return(NULL)
+    } else {
+      pgs_type <- req(try(input$pgs_selector))
+      if (pgs_type=="Clumping and thresholding (lenient)") {
+        fluidRow(
+          column(12,selectInput(inputId = "pgs_cutoff_selector", 
+                               label = "Select perturbation cutoff", 
+                               choices = c(1e-6,1e-7,1e-8)))
+        )
+      } else if (pgs_type=="Clumping and thresholding (stringent)") {
+        fluidRow(
+          column(12,selectInput(inputId = "pgs_cutoff_selector", 
+                               label = "Select perturbation cutoff", 
+                               choices = c(1e-10)))
+        )
+      }
     }
   })
   
