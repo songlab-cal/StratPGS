@@ -1,0 +1,12 @@
+name: stratPGS_v0
+title: stratPGS_v0
+username: alan-aw
+account: alan-aw
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10818499
+bundleId: 8116038
+url: https://alan-aw.shinyapps.io/stratPGS_v0/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

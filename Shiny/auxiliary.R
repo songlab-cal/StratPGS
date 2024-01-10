@@ -8,6 +8,24 @@ phenos_cossim <- readr::read_csv('phenos_cossim.csv')
 phenos_random_stats <- readr::read_csv('phenos_randomization_stats.csv')
 ukbb_table <- readr::read_csv('ukbb_table.csv')
 
+metric_names_df <- data.frame(english_name=c("Pearson r",
+                                             "Spearman \u03c1",
+                                             "Cosine Similarity",
+                                             "Prevalence at Top 10%ile",
+                                             "Prevalence at Top 1%ile",
+                                             "Odds Ratio at Top 10%ile",
+                                             "Odds Ratio at Top 1%ile",
+                                             "Percentile-Prevalence Pearson r",
+                                             "Percentile-Prevalence Spearman \u03c1",
+                                             "Percentile-Average Phenotype Pearson r",
+                                             "Percentile-Average Phenotype Spearman \u03c1"),
+                              col_name=c("PEARSON_CORR","SPEARMAN_RHO","COSINE_SIM",
+                                         "TOP10PCT_PREV","TOP1PCT_PREV","TOP10PCT_OR",
+                                         "TOP1PCT_OR","PERCENTILE_AVE_PREV_SLOPE",
+                                         "PERCENTILE_AVE_PREV_SPEARMAN",
+                                         "PERCENTILE_AVE_PHENO_SLOPE",
+                                         "PERCENTILE_AVE_PHENO_SPEARMAN"))
+
 removeLeadingZero <- function(inputString) {
   if (substr(inputString, 1, 1) == "0") {
     return(substr(inputString, 2, nchar(inputString)))
@@ -33,7 +51,8 @@ getCorrPlot <- function(x) {
     xlab('') +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           plot.title = element_text(hjust = 0.5),
-          legend.position = 'none') +
+          legend.position = 'none',
+          text=element_text(family='DejaVu Sans')) +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
   return(corr.plot)
 }
@@ -55,7 +74,8 @@ getCossimPlot <- function(x) {
     xlab('') +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           plot.title = element_text(hjust = 0.5),
-          legend.position = 'none') +
+          legend.position = 'none',
+          text=element_text(family='DejaVu Sans')) +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
   
   return(cossim.plot)
@@ -86,7 +106,8 @@ getPhenoCorrPlot <- function(x,y) {
     xlab('') +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           plot.title = element_text(hjust = 0.5),
-          legend.position = 'none') +
+          legend.position = 'none',
+          text=element_text(family='DejaVu Sans')) +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
   return(corr_plot)
 }
@@ -116,7 +137,8 @@ getPhenoCossimPlot <- function(x,y) {
     xlab('') +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
           plot.title = element_text(hjust = 0.5),
-          legend.position = 'none') +
+          legend.position = 'none',
+          text=element_text(family='DejaVu Sans')) +
     scale_fill_manual(values=c('#636363', '#e31a1c'))
   return(cossim_plot)
 }
@@ -216,7 +238,13 @@ getPGSStratStats <- function(x, y) {
     plot_to_return <- ggplot(pie_chart_df, aes(x=Chromosome, y=Count, fill=Chromosome)) +
       geom_bar(stat="identity", width=1,colour="#636363") +
       theme_bw() +
-      theme(legend.position="none")
+      theme(legend.position="none",
+            plot.title = element_text(face='bold',size=14.5,hjust=0.5),
+            strip.text.x = element_text(size = 15),
+            axis.title = element_text(size=14),
+            axis.text.x = element_text(size=12),
+            axis.text.y = element_text(size=12),
+            text=element_text(family='DejaVu Sans'))
   } else {
     df_to_return <-NULL
     plot_to_return<-NULL
@@ -277,24 +305,91 @@ getPGSStats1 <- function(x, y, z) {
                                                       "Sum(Perturbed |\u03B2\u2C7C|)/Sum(Fixed |\u03B2\u2C7C|)",
                                                       "","",""),
                              `Value` = c(format(perturb_fix_df$BETA_WILCOX_PVAL,scientific=TRUE),
-                                         perturb_fix_df$SUM_RATIO_TARGET_BKGRD,
+                                         round(perturb_fix_df$SUM_RATIO_TARGET_BKGRD,digits=4),
                                          NA,NA,NA),
                              check.names=FALSE) 
   
   return(list(SENTENCE=ifelse(is.null(perturb_fix_df),"",paste0('There are ', 
                                                                 perturb_fix_df$N_TARGET_SNPS, 
                                                                 ' variants with GWAS p-value at least ',
-                                                                z, '. These variants are Perturbed, while the remaining are Fixed.')),
+                                                                z, '. These variants are Perturbed, while the remaining ',
+                                                                perturb_fix_df$N_SNPS-perturb_fix_df$N_TARGET_SNPS,' are Fixed.')),
               TABLE=df_to_return,
               PERTURB_FIX_HEADER=ifelse(is.null(perturb_fix_df),"","3. Perturbed-Fixed Architecture")))
 }
 
 #' Get PGS summary statistics 2 -- specific performance metric and sensitivity
-#' x = PGS method
-#' y = cutoff
-#' z = metric
-getPGSStats2 <- function(x,y,z) {
+#' Show both sPGS and permutation pPGS
+#' x = phenotype
+#' y = PGS type
+#' z = cutoff
+#' w = metric
+getPGSStats2 <- function(x,y,z,w) {
+  # sensitivity metrics (matched to performance metrics)
+  message(date(), ': Generating ', 
+          y,' sensitivity plots and data using cutoff = ', 
+          z,' and metric = ',w,'...')
+  relevant_row <- ukbb_table %>% subset(english_name==x)
+  pheno_name <- relevant_row[['pheno_name']]
+  metric_name <- (metric_names_df %>% subset(english_name==w))[["col_name"]]
+  if (y == "Clumping and thresholding (lenient)") {
+    sensitivity_df <- readr::read_csv(paste0(
+      "tables/raw_perf_vs_perturb/",pheno_name,
+      "_gwas_1e-5_cutoff",gsub("e-0", "e-", z),"_metrics_df.csv")) %>% 
+      select(c("TYPE",metric_name))
+  } else if (y == "Clumping and thresholding (stringent)"){
+    sensitivity_df <- readr::read_csv(paste0(
+      "tables/raw_perf_vs_perturb/",pheno_name,
+      "_gwas_1e-8_cutoff",gsub("e-0", "e-", z),"_metrics_df.csv")) %>% 
+      select(c("TYPE",metric_name))
+  } else {
+    sensitivity_df <- NULL
+  }
+  colnames(sensitivity_df) <- c("Type","value")
   
+  shuffle.and.orig.melted.df <- reshape2::melt(sensitivity_df, id.vars = 'Type')
+  
+  # Generate plot 
+  plot_to_return <- ggplot(sensitivity_df, aes(x=value,fill=factor(Type))) +
+    geom_histogram(position = "dodge") +
+    theme_bw() +
+    ylab('Count') +
+    xlab('Value') +
+    guides(fill=guide_legend("PGS Type")) +
+    ggtitle('Relative Performance of PGS') +
+    theme(legend.position = 'right',
+          plot.title = element_text(size=16,hjust=0.5),
+          strip.text.x = element_text(size = 14.5),
+          axis.title = element_text(size=15),
+          axis.text.x = element_text(size=14),
+          axis.text.y = element_text(size=14),
+          text=element_text(family='DejaVu Sans')) +
+    scale_fill_manual(values = c("#b30000","#6baed6","#74c476"),
+                      breaks = c("original", "shuffle", "signflip"),
+                      labels=c("original","pPGS","sPGS")) 
+  
+  # Generate sentence
+  orig_perf <- (sensitivity_df %>% subset(Type=="original"))[['value']]
+  sPGS_p_val <- format(mean(orig_perf <= 
+                              c((sensitivity_df %>% subset(Type=="signflip"))[['value']],orig_perf)),
+                       scientific=TRUE)
+  pPGS_p_val <- format(mean(orig_perf <= 
+                              c((sensitivity_df %>% subset(Type=="shuffle"))[['value']],orig_perf)),
+                       scientific=TRUE)
+  
+  df_to_return <- data.frame(Quantity = c("Original PGS Performance Metric",
+                                          "Permuted PGS Relative Performance p-val",
+                                          "Sign-flipped PGS Relative Performance p-val"),
+                             Value = c(round(orig_perf,digits=4),
+                                       pPGS_p_val,
+                                       sPGS_p_val))
+  # Return
+  return(list(PLOT=plot_to_return,
+              TABLE=df_to_return,
+              HEADER=ifelse(is.null(sensitivity_df),"","4. PGS Performance and Sensitivity"),
+              SENTENCE=ifelse(is.null(sensitivity_df),
+                              "",
+                              "Performance of the PGS based on the selected metric is reported below, along with its relative performance against perturbed PGSs. There are two types of perturbed PGSs: permuted PGSs (pPGSs) and sign-flipped PGSs (sPGSs). See <b>Methodology</b> tab for details.")))
 }
 
 # x <- covar.ids[1]
