@@ -4,26 +4,22 @@ Aboutinfo_page <- tabPanel(
   title='About',
   h3("Summary"),
   wellPanel(
-    p(paste("We created an"),HTML(paste0(tags$em("in-silico "))),("genetic priority score that can inform drug target prioritization and validation for"),paste(comma(1)), paste("genes and"), paste(2), paste("phenotypes. This score is constructed as a weighted sum of the effects of eight phenotypic specific features (described below) on drug indication using Firth logistic regression with five-fold cross-validation and was applied to"), comma(2),("protein-coding genes and"), 3, ("phenotypes. We further incorporated the direction of genetic effect for each predictor using predictions of loss-of-function (LOF) and gain-of-function (GOF) from LoGoFunc"),HTML(paste0(tags$sup("1"))),span("for clinical variants and quantitative trait loci estimates for genome-wide association studies (GWAS) phenotypes and created a complementary genetic priority score with the direction of effect (GPS-D). In our study, we discovered that drugs with a high priority score are much more likely to progress through clinical trials and we recommend using a score cut-off > 1.5 that corresponds to an odds ratio (OR) >=9 of being a therapeutic target when compared to drugs with no genetic evidence.")),
-    p(paste0("This web application can be used to search for putative therapeutic targets with genetic priority scores and evidence for direction of genetic effect. We included drug indication data from the Open Targets Platform"),HTML(paste0(tags$sup("2"))), ( "and the Side effect Resource (SIDER) 4.1"),HTML(paste0(tags$sup("3"))) ,(" and mapped all drug indications and genetic phenotypes to phecode integer terms. We have provided evidence of each genetic association and predicted direction of genetic effect and users can search this website by a gene target or phenotype of interest. We note that these results should be a starting point for users to conduct follow-up analyses and if a gene and phenotype are not present in this table, this should not be interpreted as a drug target with genetic support against it.")),
-    p("For further details about the methods and analysis behind this study, please see our paper: Duffy, A et al. Development of a human genetics-guided priority score for 19,365 genes and 399 drug indications. Submitted.")
+    p(paste("We have proposed"),
+      HTML(paste0(tags$em("tests of performance sensitivity"))),
+      ("that detect whether a polygenic score (PGS) is overfitted to population structure. Our tests work on any PGS, and only require selecting variants that have high GWAS p-value and application to a held-out validation cohort not used in training the PGS model. We specifically test for whether the effects of the selected variants are causal, under the null hypotheses that the effects are permutation-invariant and that effect directions are random. When these null hypotheses hold, the performance of a PGS with the selected variant effects perturbed or effect directions flipped would not be worse, leading to the PGS exhibiting low performance sensitivity.")),
+    p("The core thesis of our work is that PGSs using too many variants are overparameterized, with the overparameterization capturing population structure. Our thesis is justified by the following arguments."),
+    tags$li("Theoretically, PGSs can be viewed as linear combinations of PCs, or linear combinations of singular vectors with skewed weights that capture genetic structure."),
+    tags$li(HTML(paste("This implies that choosing completely random variant effects for a PGS leads to 'better than random' performance, if the phenotype also happens to be stratified. We observe this in data from the UK Biobank",HTML(paste0(tags$sup("1"))),"."))),
+    tags$li("Empirically, permuting or flipping the signs of some variants — specifically variants with high GWAS p-value — in a PGS does not weaken the performance in a held-out cohort."),
+    tags$li("Across phenotypes, the extent to which PGS performance is weakened by the above procedure is driven by stratification of PGS by PCs in the discovery cohort."),
+    br(),
+    p(paste0("This dashboard accompanies our paper, by allowing the user to analyze our findings (e.g., sensitivity test p-values) at the individual phenotype level. Users may also find the visualizations helpful for gaining intuition about the measures, metrics and tests proposed in our work."))
   ),
   
-  h3("Instructions"),
+  h3("Methodology"),
   wellPanel(
-    p("Users can use this website to explore associations by gene or by phenotype. All associations have evidence from at least one genetic association and this evidence can be refined using the score cutoff slider at 0.3 increment thresholds of the genetic priority score"),
-    p(span("When the Gene tab is selected, users can search the priority scores for their gene of choice in the"),
-      strong("‘Search Gene Target’"),
-      span("tab. When the phenotype tab is selected, users can select their phenotype of interest from the dropdown"), strong("‘Select phenotype:’"),
-      span("dropdown bar."),
-      br()),
-    p(span("Once a gene or phenotype is searched on the left side panel, this will generate a table of results in the", strong("Table"),span("tab. Users can click on the"), strong("Evidence"),span("and the"), strong("DOE Evidence"), span("tab to generate heatmaps of the associations with the genetic predictors on the X-axis and the associated gene/phenotypes on the Y-axis. The"), strong("Evidence"), span("tab generates a heatmap with the genetic evidence for a predictor colored in purple and the user can hover over the cell to get the phenotype description from the phenotype data source. The"),
-           strong("DOE Evidence"), span("tab generates a heatmap with genetic evidence predicted as loss-of-function (LOF) colored in pink and predictions of gain-of-function (GOF) colored in blue."),
-           span("For genes/phenotypes with more than 100 rows of evidence, only the top 100 high-scored genes/phenotypes are shown.")))
-  ),
-  h3("Genetic Evidence"),
-  wellPanel(
-    p(paste0("Using publicly available data sources, we collected eight genetic features from three types of genetic evidence (clinical variants, coding variants and GWAS phenotypes). We mapped these features to phecodes and restricted these to phecode integer terms. Phecodes that mapped to phecode categories: ‘infectious diseases’, ‘pregnancy complications’, ‘injuries and poisonings’ and ‘null’ were excluded from the analysis. Each of these genetic features is described below.")),
+    p("Here we provide technical elaborations to ensure our dashboard is sufficiently self-contained. Please refer to the Materials and Methods section of our paper for full details."),
+    HTML('<center><img src="outline_graphic.jpg" width="800"></center>'),
     h4("Clinical variants"),
     p(span(strong("OMIM:"), span("Mendelian genes from the Online Mendelian Inheritance in Man (OMIM) database"),HTML(paste0(tags$sup("4"))),span('.'),
     )),
@@ -47,23 +43,26 @@ Aboutinfo_page <- tabPanel(
     ))),
   h3("Citation"),
   wellPanel(
-    p('Duffy, A et al. Development of a human genetics-guided priority score for 19,365 genes and 399 drug indications. Submitted.'),
+    p("Aw, A. et al. 'Highly parameterized polygenic scores tend to overfit to population stratification via random effects'. Submitted."),
   ),
   h3("Contact"),
   wellPanel(
     p('For any queries please contact:'),
-    p(mailtoR(email = "Ron.do@mssm.edu",
-              text = "Ron.do@mssm.edu"),
-      
+    p(mailtoR(email = "alan.aw@pennmedicine.upenn.edu",
+              text = "Alan Aw"),
       use_mailtoR()),
-    tags$a(href='https://labs.icahn.mssm.edu/dolab/people/',
-           'The Do Lab'),
+    p(mailtoR(email = "EliorRahmani@mednet.ucla.edu",
+              text = "Elior Rahmani"),
+      use_mailtoR()),
+    tags$a(href='https://people.eecs.berkeley.edu/~yss/contact.html',
+           'Song Lab (PI: Yun Song)'),
     
   ),
   br(),
   h3("References"),
   wellPanel(
-    p(span('1.  David, S. et al. Genome-wide prediction of pathogenic gain- and loss-of-function variants from ensemble learning of a diverse feature set. '), em('bioRxiv'),span('2022.06.08.495288 (2022).')),
+    p(span('1.  Bycroft, C. et al. The UK Biobank resource with deep phenotyping and genomic data. '), 
+      em('Nature'),strong('562'), span( '203-209 (2018).')),
     p(span('2.	Ochoa, D. et al. Open Targets Platform: supporting systematic drug-target identification and prioritisation. '), em('Nucleic Acids Res '), strong(' 49'), span(', D1302-D1310 (2021).')),
     p(span('3.	Kuhn, M., Letunic, I., Jensen, L.J. & Bork, P. The SIDER database of drugs and side effects. '), em('Nucleic Acids Res '), strong('44'), span(', D1075-D1079 (2016).')),
     p(span('4.	Hamosh, A. et al. Online Mendelian Inheritance in Man (OMIM), a knowledgebase of human genes and genetic disorders. '), em(' Nucleic Acids Res '), strong('30'), span(', 52-5 (2002).')),

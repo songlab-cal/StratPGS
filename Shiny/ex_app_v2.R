@@ -186,8 +186,24 @@ PGS_page <- tabPanel(
              )),
     tabPanel("Polygenic Architecture and Performance Sensitivity",
              h4(uiOutput("nonSigHeader")),
+             uiOutput("PGScutoffselect"),
+             p(uiOutput("pgsPerturbFixedSentence")),
              p(uiOutput("ifnoPGS")),
-             uiOutput("PGScutoffselect")
+             h4(uiOutput("pgsPerturbFixedHeader")),
+             column(12, align="center", 
+                    tableOutput("pgsPerturbFixedSummary"),
+             ),
+             h4(uiOutput("pgsSensitivityHeader")),
+             uiOutput("PGSmetricselect"),
+             uiOutput("pgsSensitivitySentence"),
+             br(),
+             fluidRow(
+               id="sensitivity_diagnosis",
+               column(7,
+                      plotOutput(outputId = "pgsSensitivityPlot")),
+               column(5,
+                      tableOutput("pgsSensitivitySummary"))
+             )
              )
   )
 )
@@ -386,6 +402,42 @@ server <- function(input, output,session) {
       }
     }
   })
+  
+  # PGS cutoff selector
+  output$PGSmetricselect <- renderUI({
+    no_avail_pgs <- summarizedPheno()[["No_Avail_PGS"]] 
+    if (no_avail_pgs==0) {
+      return(NULL)
+    } else {
+      fluidRow(
+        column(5,selectInput(inputId = "pgs_metric_selector", 
+                             label = "Select performance metric", 
+                             choices = metric_names_df$english_name))
+      )
+    }
+  })
+  
+  # PGS Perturb-Fixed Architecture Data
+  pgsPerturbFixed <- reactive({getPGSStats1(x=input$pheno_selector,
+                                            y=input$pgs_selector,
+                                            z=input$pgs_cutoff_selector)})
+  output$pgsPerturbFixedSentence <- renderUI(req(try(pgsPerturbFixed()$SENTENCE)))
+  output$pgsPerturbFixedSummary <- renderTable(req(try(pgsPerturbFixed()$TABLE)),
+                                               hover=TRUE,
+                                               digits=4,bordered=TRUE)
+  output$pgsPerturbFixedHeader <- renderUI(req(try(pgsPerturbFixed()$PERTURB_FIX_HEADER)))
+  
+  # PGS Sensitivity Data
+  pgsSensitivity <- reactive({getPGSStats2(x=input$pheno_selector,
+                                           y=input$pgs_selector,
+                                           z=input$pgs_cutoff_selector,
+                                           w=input$pgs_metric_selector)})
+  output$pgsSensitivitySummary <- renderTable(req(try(pgsSensitivity()$TABLE)),
+                                              hover=TRUE,
+                                              bordered=TRUE)
+  output$pgsSensitivityPlot <- renderPlot(req(try(pgsSensitivity()$PLOT)))
+  output$pgsSensitivityHeader <- renderUI(req(try(pgsSensitivity()$HEADER)))
+  output$pgsSensitivitySentence <- renderUI(req(try(HTML(pgsSensitivity()$SENTENCE))))
   
   ## Gene Page
   

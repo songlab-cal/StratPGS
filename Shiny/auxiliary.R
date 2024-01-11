@@ -287,7 +287,6 @@ getPGSStats1 <- function(x, y, z) {
     perturb_fix_df <- NULL
   }
   
-  #print(perturb_fix_df)
   df_to_return <- data.frame(`Fixed Variant Quantity` = c("Maximum |\u03B2\u2C7C|",
                                                           "Median |\u03B2\u2C7C|",
                                                           "Mean |\u03B2\u2C7C|",
@@ -322,7 +321,7 @@ getPGSStats1 <- function(x, y, z) {
                                                                 z, '. These variants are Perturbed, while the remaining ',
                                                                 perturb_fix_df$N_SNPS-perturb_fix_df$N_TARGET_SNPS,' are Fixed.')),
               TABLE=df_to_return,
-              PERTURB_FIX_HEADER=ifelse(is.null(perturb_fix_df),"","3. Perturbed-Fixed Architecture")))
+              PERTURB_FIX_HEADER=ifelse(is.null(perturb_fix_df),"","Perturbed-Fixed Architecture")))
 }
 
 #' Get PGS summary statistics 2 -- specific performance metric and sensitivity
@@ -393,10 +392,10 @@ getPGSStats2 <- function(x,y,z,w) {
   # Return
   return(list(PLOT=plot_to_return,
               TABLE=df_to_return,
-              HEADER=ifelse(is.null(sensitivity_df),"","4. PGS Performance and Sensitivity"),
+              HEADER=ifelse(is.null(sensitivity_df),"","PGS Performance and Sensitivity"),
               SENTENCE=ifelse(is.null(sensitivity_df),
                               "",
-                              "Performance of the PGS based on the selected metric is reported below, along with its relative performance against perturbed PGSs. There are two types of perturbed PGSs: permuted PGSs (pPGSs) and sign-flipped PGSs (sPGSs). See <b>Methodology</b> tab for details.")))
+                              "Performance of the PGS based on the selected metric is reported below, along with its relative performance against perturbed PGSs. There are two types of perturbed PGSs: permuted PGSs (pPGSs) and sign-flipped PGSs (sPGSs). See <b>About</b> tab for details.")))
 }
 
 # x <- covar.ids[1]
