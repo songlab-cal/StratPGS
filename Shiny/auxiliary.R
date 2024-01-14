@@ -397,20 +397,3 @@ getPGSStats2 <- function(x,y,z,w) {
                               "",
                               "Performance of the PGS based on the selected metric is reported below, along with its relative performance against perturbed PGSs. There are two types of perturbed PGSs: permuted PGSs (pPGSs) and sign-flipped PGSs (sPGSs). See <b>About</b> tab for details.")))
 }
-
-# x <- covar.ids[1]
-# plots <- getPCPlots(x)
-# getwd()
-# readRDS('/deep_learning/aaw/021423/plots/Alcohol_intake_frequency_-3.0_plots.rds')
-# List the library paths
-# The issue is likely to be in the first directory
-# paths = .libPaths()
-# 
-# ## Try and detect bad files
-# list.files(paths, 
-#            pattern = "^00LOCK*|*\\.rds$|*\\.RDS$",
-#            full.names = TRUE)
-# 
-# ## List files of size 0
-# l = list.files(paths, full.names = TRUE)
-# l[sapply(l, file.size) == 0]
