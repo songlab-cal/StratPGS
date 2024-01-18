@@ -1,4 +1,4 @@
-# Welcome to StratPRS
+# Welcome to StratPGS
 
 This repo contains results and scripts for reproducing and repurposing our analyses in our work,
 
