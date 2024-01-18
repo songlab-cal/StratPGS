@@ -1,0 +1,3 @@
+# ignore Shiny and redundant directories
+Shiny/
+redundant/
