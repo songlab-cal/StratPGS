@@ -8,11 +8,11 @@ This repo contains results and scripts for reproducing and repurposing our analy
 
 <p align="center">
 <picture>
-  <img src="images/dashboard.png" width="400"/>
+  <img src="images/dashboard.png" width="480"/>
 </picture>
 </p>
 
-As the image above shows, we also present our results in an interactive dashboard, available [here](https://alan-aw.shinyapps.io/stratPGS_v0/).
+As the image above shows, we also present our results in an interactive dashboard, available [here](https://alan-aw.shinyapps.io/stratPGS_v0/). 
 
 # Directory Structure
 
