@@ -117,7 +117,7 @@ readr::write_csv(PRS_metadata_df,
 log_close()
 writeLines(readLines(lf))
 
-## Plotting
+## Plotting ------------------------------------------------------------
 PRS_metadata_annotated_df <- readr::read_csv(paste0(out_dir,"PGS_catalogue_metadata_annotated.csv"))
 View(PRS_metadata_df %>% 
        group_by(PHENOTYPE) %>% 
@@ -134,108 +134,30 @@ plot1 <- ggplot(data=PRS_metadata_annotated_df) +
                  color='black',
                  alpha=0.7) +
   theme_bw() +
-  xlab(expression(paste(log[10],'(No. Variants Included in PRS)'))) +
+  xlab(expression(paste(log[10],'(No. Variants Included in PGS)'))) +
   ylab('Count') +
   ylim(c(0,600)) +
-  ggtitle('A. Dimensionality of 3,683 PRSs from the PGS Catalogue') +
-  theme(plot.title = element_text(face='bold',size=17),
-        axis.title.x = element_text(size = 16),
-        axis.text.x = element_text(size = 15),
-        axis.text.y = element_text(size = 15),
-        axis.title.y = element_text(size = 16))
-
-ggsave(plot1,
-       file = "/global/scratch/projects/fc_songlab/alan/prs_and_structure/PRS_variant_counts_logplot.jpg",
-       width = 6.5, height = 4,
-       dpi = 300)
-
-## Creation of new Figure 1  ---------------------------------------------------
-dir_prefix <- "/global/scratch/projects/fc_songlab/alan/prs_and_structure/"
-prs_dist_summaries_cutoff1e6 <- readr::read_csv(paste0(dir_prefix,
-                                                       "Github/MCH_PRS_dist_summaries/prs_dist_summaries_cutoff1e-6.csv"))
-combined_cutoff1e6_shuffle_metrics <- readr::read_csv(paste0(dir_prefix,
-                                                             "Github/MCH_raw_sensitivity_scores/combined_cutoff1e-6_shuffle_metrics_df.csv"))
-prs_max_shuffle_sensitivity_min <- readr::read_csv(paste0(dir_prefix,
-                                                             "Github/MCH_min_and_sum_sensitivity_scores/prs_max_shuffle_sensitivity_min.csv"))
-orig_prs_ranked_df <- readr::read_csv(paste0(dir_prefix,
-                                             "Github/MCH_original_PRS_performance/orig_prs_ranked_performance.csv"),
-                                      show_col_types = FALSE)
-orig_prs_performance <- readr::read_csv(paste0(dir_prefix,
-                                             "Github/MCH_original_PRS_performance/orig_prs_performance.csv"),
-                                      show_col_types = FALSE)
-# Sensitivity plotting
-library(ggrepel)
-left_df <- prs_dist_summaries_cutoff1e6 %>% select(c("PHENOTYPE","N_SNPS")); colnames(left_df)[1] <- "PRS_ID"
-right_df <- prs_max_shuffle_sensitivity_min %>% select(c("PRS_ID","CUTOFF_1e-6"));colnames(right_df)[2] <- "AGGREGATED"
-combined_df_sensitivity <- left_join(left_df,right_df,by="PRS_ID")
-
-new_plot_C <- ggplot(combined_df_sensitivity %>% 
-                       subset(AGGREGATED >=0.75),
-                     aes(y=AGGREGATED,
-                         x=log10(N_SNPS),
-                         label=PRS_ID)) +
-  geom_point() +
-  #geom_text(hjust=0,vjust=0) +
-  geom_label_repel(aes(label = PRS_ID),
-                   box.padding   = 0.35, 
-                   point.padding = 0.5,
-                   alpha=0.5,
-                   segment.color = 'grey50',
-                   max.overlaps=Inf) +
-  theme_bw() +
-  xlab(expression(paste(log[10],'(No. Variants)'))) +
-  xlim(c(2,7)) +
-  ylim(c(0.75,1)) +
-  #ylab('Minimum Sensitivity Degree Across Metrics') +
-  ylab('Sensitivity Score') +
-  ggtitle('C. Sensitivity of MCH PRSs') +
-  theme(plot.title = element_text(face='bold',size=17),
-        axis.title.x = element_text(size = 16),
-        axis.text.x = element_text(size = 15),
-        axis.text.y = element_text(size = 15),
-        axis.title.y = element_text(size = 16))
-
-# Original performance plotting
-ranks_mat <- apply(orig_prs_performance[-c(16,17),-1],2,function(x){rank(x)})
-agg_ranks <- rowSums(ranks_mat)
-PRS_IDs <- orig_prs_performance$PRS_ID[-c(16,17)]
-agg_rank_df <- data.frame(PRS_ID=PRS_IDs,AGGREGATED=agg_ranks)
-combined_df_orig <- left_join(left_df,agg_rank_df,by="PRS_ID")
-
-two_metrics_df <- orig_prs_performance[-c(16,17),c("PRS_ID","SPEARMAN_RHO","TOP10PCT_OR")]
-two_metrics_df <- left_join(left_df,two_metrics_df,by="PRS_ID")
-
-new_plot_B <- ggplot(two_metrics_df,aes(y=SPEARMAN_RHO,
-                          x=TOP10PCT_OR,
-                          label=PRS_ID)) +
-  geom_point(aes(color=log10(N_SNPS))) +
-  #geom_text(hjust=0,vjust=0) +
-  geom_label_repel(aes(label = PRS_ID),
-                   box.padding   = 0.35, 
-                   point.padding = 0.5,
-                   alpha=0.5,
-                   segment.color = 'grey50',
-                   max.overlaps=Inf) +
-  theme_bw() +
-  xlab("OR of Top 10% Scoring Individuals") +
-  ylab('Rank Correlation with Phenotype') +
-  theme(plot.title = element_text(face='bold',size=17),
+  geom_vline(xintercept=log10(median(PRS_metadata_annotated_df$NO_NONZERO_VARIANTS)),
+             lty='dashed',
+             colour="#0570b0") +
+  annotate(geom="text", 
+           x=1.6, y=500, 
+           label="Median No. Variants\n= 5,578",
+           size=5,
+           color = "#0570b0") +
+  #ggtitle('A. Dimensionality of 3,683 PRSs from the PGS Catalogue') +
+  ggtitle('Dimensionality of 3,683 PGSs\nfrom the PGS Catalogue') +
+  theme(plot.title = element_text(face='bold',size=17,hjust=0.5),
         axis.title.x = element_text(size = 16),
         axis.text.x = element_text(size = 15),
         axis.text.y = element_text(size = 15),
         axis.title.y = element_text(size = 16),
-        legend.position = c(.6,.12), 
-        legend.direction = "horizontal",
-        legend.title=element_text(size=15,hjust=-0.5)) +
-  scale_colour_continuous(name=expression(paste(log[10],"(No. Variants)     "))) +
-  ggtitle('B. Performance of MCH PRSs')
+        text=element_text(family='DejaVu Sans'))
 
-# Combining all plots
-library(gridExtra)
-plots_B_and_C <- gridExtra::grid.arrange(new_plot_B,new_plot_C,ncol=2)
-all_three_plots <- gridExtra::grid.arrange(plot1, plots_B_and_C,nrow=2)
+# Optional: Save
+ggsave(plot1,
+       file = "PRS_variant_counts_logplot_100423.jpg",
+       width = 5, height = 5,
+       #width = 6.5, height = 4,
+       dpi = 1000)
 
-ggsave(all_three_plots,
-       filename = paste0(dir_prefix,"figures/MainText_080523_Fig1_1e-6.jpg"),
-       width = 12.5, height = 12.5,
-       dpi = 300)

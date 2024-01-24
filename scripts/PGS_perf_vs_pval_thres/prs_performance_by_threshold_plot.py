@@ -1,6 +1,3 @@
-
-
-
 import json
 import math
 
@@ -62,7 +59,7 @@ def plot_rare_vs_common(p_thresholds, y_common, nloci, outpath='temp.pdf'):
     nloci = adjust_sizes(nloci, k)
     color = '#1f77b4'
     ax.scatter(-numpy.log10(-numpy.log10(p_thresholds)), y_common, nloci, 
-               color=color + 'cc', linewidth=2, edgecolor=color + 'ff')
+               color=color + 'cc', linewidth=2, edgecolor=color + 'ff',clip_on=False)
     
     xticks = [1e-100, 1e-30, 1e-10, 1e-5]
     ax.set_xticks(-numpy.log10(-numpy.log10(xticks)))
@@ -77,9 +74,9 @@ def plot_rare_vs_common(p_thresholds, y_common, nloci, outpath='temp.pdf'):
     
     add_size_legend(ax, k)
     
-    fig.savefig(outpath, transparent=True)
+    fig.savefig(outpath, transparent=True, bbox_inches='tight')
 
-with open('/home/jmcrae/prs_stats_for_alan.2023-10-18.json', 'rt') as handle:
+with open('../../results/PGS_perf_vs_pval_thres/prs_stats_for_alan.2023-10-18.json', 'rt') as handle:
     results = json.load(handle)
 
 # average across all traits
@@ -87,4 +84,4 @@ p_thresholds = get_average([[float(x) for x in results[t]] for t in results])
 common_r2 = get_average([[math.sqrt(results[t][x]['common_r2']) for x in results[t]] for t in results])
 nloci = get_average([[results[t][x]['nloci'] for x in results[t]] for t in results])
 
-plot_rare_vs_common(p_thresholds, common_r2, nloci, outpath='/home/jmcrae/prs_stats_for_alan.2023-10-18.pdf')
+plot_rare_vs_common(p_thresholds, common_r2, nloci, outpath='../../results/PGS_perf_vs_pval_thres/PRS-plot-2023-10-19.pdf')
