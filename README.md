@@ -7,7 +7,9 @@ This repo contains results and scripts for reproducing and repurposing our analy
 ## Dashboard
 
 <p align="center">
-  <img src="images/dashboard.png" />
+<picture>
+  <img src="images/dashboard.png" width="400"/>
+</picture>
 </p>
 
 As the image above shows, we also present our results in an interactive dashboard, available [here](https://alan-aw.shinyapps.io/stratPGS_v0/).
