@@ -2,7 +2,7 @@
 
 This repo contains results and scripts for reproducing and repurposing our analyses in our work,
 
-> Alan Aw, Jeremy McRae, Elior Rahmani and Yun Song (2024+) "Highly parameterized polygenic scores tend to overfit to population stratification via random effects"
+> Alan Aw, Jeremy McRae, Elior Rahmani and Yun Song (2024+) "Highly parameterized polygenic scores tend to overfit to population stratification via random effects" *bioRXiv preprint*. DOI: [10.1101/2024.01.27.577589](https://doi.org/10.1101/2024.01.27.577589) 
 
 ## Dashboard
 
@@ -32,6 +32,10 @@ Under `scripts`, similar directory organization as Results. We include one addit
 ## Logs
 
 Under `logs`, we provide log files that record the statistical tests we performed, as described in our paper.
+
+## Manuscript
+
+Under `manuscript`, we provide the Supplementary Material for our work, which contains technical details and more mathematical ideas that unfortunately could not fit into the Main Text.
 
 # Notes
 
